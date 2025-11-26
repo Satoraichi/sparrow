@@ -224,7 +224,7 @@ img.icon{
 .post-footer{
     display: flex;
     align-items: flex-end;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-top: 1rem;
 }
 
@@ -268,7 +268,7 @@ button.unlike span {
 }
 
 .comment-form{
-    width:calc(100% - 25rem);
+    width: auto;
     display: flex;
     background-color: #8d8d8d44;
     padding: .5rem;
@@ -279,7 +279,7 @@ button.unlike span {
 .comment-form textarea{
     overflow: hidden;      /* スクロールバー非表示 */
     resize: none;          /* ユーザーによるリサイズ禁止 */
-    width: calc(100% - 4rem);
+    width: 15rem;
     height: auto;
     padding-left: .5rem;
     line-height: 1.2em;

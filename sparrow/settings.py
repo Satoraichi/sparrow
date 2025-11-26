@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-k30irhcktxj3&dfjn9@%*z_f%g_in^$rr@23pc1u9!&dzec5qi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 # Application definition
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'posts',
     'accounts',
+    'sslserver',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "accounts.middleware.LoginRequiredMiddleware",
 ]
 
 ROOT_URLCONF = 'sparrow.urls'
@@ -133,3 +136,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles" 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
+
+# 起動するIPアドレスとポートを指定
+RUNSERVERPLUS_SERVER_ADDRESS_PORT = '0.0.0.0:8000'
+

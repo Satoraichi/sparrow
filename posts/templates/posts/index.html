@@ -23,7 +23,7 @@
         </div>
     </div>
     {% if current_user.is_authenticated %}
-    <form action="{% url 'logout' %}" method="post" class="logout-form">
+    <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
         {% csrf_token %}
         <button type="submit" class="logout-button">ログアウト</button>
     </form>
@@ -63,7 +63,7 @@
                 <img src="{{ post.author.icon.url }}" class="icon">
             </div>
             <div class="post-content">
-                <div class="name"><label>{{ post.author.display_name }}</label> @{{ post.author.username }}</div>
+                <div class="name"><label>{{ post.author.display_name }}</label> @{{ post.author.username }}<span style="margin-left: auto; font-size: 1rem; color: #d8d8d8;">{{ post.created_at|timesince }}前</span></div>
 
                 <div class="post-body">
                     {{ post.content|linebreaksbr}}
@@ -73,6 +73,7 @@
         <div class="post-footer">
             {% if current_user.is_authenticated %}
         <div class="comment-form">
+            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
             <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
             <button type="button" class="comment-btn" data-post-id="{{ post.post_id }}">送信</button>
         </div>
@@ -90,7 +91,6 @@
                 {% endif %}
             </form>
             <span>ポストID:{{ post.post_id }}</span>
-            <span>{{ post.created_at }}</span>
         </div>
 
         <!-- コメント一覧 -->
@@ -104,10 +104,9 @@
                     </div>
                     {% if current_user.is_authenticated %}
                     <div class="post-content">
-                        <div class="name"><label>{{ comment.user.display_name }}</label> @{{ comment.user.username }}</div>
+                        <div class="name"><label>{{ comment.user.display_name }}</label> @{{ comment.user.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span></div>
                     {% endif %}
                         <p class="comment-text">{{ comment.text }}</p>
-                        <span class="comment-time">{{ comment.created_at }}</span>
                     </div>
                 </div>
             {% endfor %}
@@ -212,24 +211,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 const newComment = document.createElement("div");
                 newComment.classList.add("comment");
                 newComment.dataset.commentId = data.comment_id;
-
                 newComment.innerHTML = `
-                    ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
-                    <span>${data.display_name} @${data.username}</span>
-                    <p>${data.text}</p>
-                    <span>${data.created_at}</span>
+                    <div class="icon_background">
+                        ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
+                    </div>
+                    <div class="post-content">
+                        <div class="name">
+                            <label>${data.display_name}</label> @${ data.username }
+                        </div>
+                        <p class="comment-text">${data.text}</p>
+                    </div>
                 `;
 
-                // コメントリストの先頭に追加
                 commentList.prepend(newComment);
 
-                // テキストエリアをクリア
                 textarea.value = "";
             });
         });
     });
 });
-
 </script>
 
 {% endblock %}
