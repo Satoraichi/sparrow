@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Sparrow | SNS{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'posts/base.css' %}">
+        {% comment %} Material Symbols Rounded {% endcomment %}
+        <link rel="preload"
+            as="style" 
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+            onload="this.onload=null;this.rel='stylesheet'">
+        <noscript>
+            <link rel="stylesheet"
+                    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+        </noscript>
+        {% block extra_style %}{% endblock %}
+    </head>
+    <body>
+        <main>
+        {% block content %}{% endblock %}
+        </main>
+    </body>

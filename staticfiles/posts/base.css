@@ -1,0 +1,167 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho&display=swap');
+
+@font-face {
+    font-family: 'fot-tsukuardgothic-std';
+    src: url('./fonts/TsukuARdGothic-Regular.otf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'fot-tsukuardgothic-std B';
+    src: url('./fonts/TsukuARdGothic-Bold.otf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+html {
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+/*パラメータ設定*/
+body {
+    --background-color: linear-gradient(60deg, #12161c, #141b27, #15233c);
+    --color: #ffffff;
+    --label-color: #787878;
+    --re-color: #fff;
+    --theme-color1: #fbe56a;
+    --theme-shadow-color: #cdd297bb;
+    --theme-color2: #e7d885;
+    --card-color: #ffffffee;
+    --accent-color1: #1aaf7d;
+    --accent-color2: #198863;
+    --accent-shadow-color: #2a5457bb;
+    --re-accent-shadow-color: #c4c46cbb;
+    --accent-bg-color: #fbfdce50;
+    --title-font: "Shippori Mincho";
+    --text-font: "fot-tsukuardgothic-std";
+    --text-font-B: "fot-tsukuardgothic-std B";
+    --button-font: "fot-tsukuardgothic-std";
+    --button-font-B: "fot-tsukuardgothic-std B";
+}
+
+body.dark-mode {
+    --background-color: linear-gradient(80deg, #12161c, #141b27, #15233c);
+    --color: #ffffff;
+    --label-color: #b9b9b9;
+    --re-color: #000;
+    --theme-color1: #298e90;
+    --theme-color2: #237684;
+    --theme-shadow-color: #2e4a4cbb;
+    --card-color: #262623aa;
+    --accent-color1: #ddb462;
+    --accent-color2: #d5b56f;
+    --accent-shadow-color: #cdd297bb;
+    --re-accent-shadow-color: #2a5057bb;
+    --accent-bg-color: #404f4aaa;
+}
+
+body {
+    display: flex;
+    flex-flow: column;
+    background: var(--background-color);
+    color: var(--color);
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    transition: 2s all;
+    -ms-overflow-style: none;
+    font-family: var(--text-font);
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+main {
+    width: 100%;
+    /* 残りのすべての垂直スペースを占有させる */
+    flex-grow: 1; 
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.material-symbols-rounded {
+    display: inline-flex;
+    vertical-align: text-bottom;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    -webkit-user-select: none;
+    user-select: none;
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+    color: var(--color);
+}
+
+h1 {
+    font-family: var(--title-font);
+}
+
+button.basic{
+    box-sizing: border-box;
+    padding: .5rem 1rem;
+    font-family: var(--text-font-B);
+    font-size: 1rem;
+    color: #fff;
+    background-color: #1c7aff;
+    border: none;
+    --corner-radius: 1.4rem;
+    clip-path: polygon(calc(100% + var(--corner-radius) * -0.9476) calc(var(--corner-radius) * 0.0000), calc(100% + var(--corner-radius) * -0.8949) calc(var(--corner-radius) * 0.0004), calc(100% + var(--corner-radius) * -0.8418) calc(var(--corner-radius) * 0.0013), calc(100% + var(--corner-radius) * -0.7881) calc(var(--corner-radius) * 0.0032), calc(100% + var(--corner-radius) * -0.7337) calc(var(--corner-radius) * 0.0063), calc(100% + var(--corner-radius) * -0.6787) calc(var(--corner-radius) * 0.0112), calc(100% + var(--corner-radius) * -0.6231) calc(var(--corner-radius) * 0.0182), calc(100% + var(--corner-radius) * -0.5671) calc(var(--corner-radius) * 0.0278), calc(100% + var(--corner-radius) * -0.5111) calc(var(--corner-radius) * 0.0406), calc(100% + var(--corner-radius) * -0.4555) calc(var(--corner-radius) * 0.0570), calc(100% + var(--corner-radius) * -0.4009) calc(var(--corner-radius) * 0.0775), calc(100% + var(--corner-radius) * -0.3480) calc(var(--corner-radius) * 0.1026), calc(100% + var(--corner-radius) * -0.2974) calc(var(--corner-radius) * 0.1324), calc(100% + var(--corner-radius) * -0.2499) calc(var(--corner-radius) * 0.1670), calc(100% + var(--corner-radius) * -0.2063) calc(var(--corner-radius) * 0.2063), calc(100% + var(--corner-radius) * -0.1670) calc(var(--corner-radius) * 0.2499), calc(100% + var(--corner-radius) * -0.1324) calc(var(--corner-radius) * 0.2974), calc(100% + var(--corner-radius) * -0.1026) calc(var(--corner-radius) * 0.3480), calc(100% + var(--corner-radius) * -0.0775) calc(var(--corner-radius) * 0.4009), calc(100% + var(--corner-radius) * -0.0570) calc(var(--corner-radius) * 0.4555), calc(100% + var(--corner-radius) * -0.0406) calc(var(--corner-radius) * 0.5111), calc(100% + var(--corner-radius) * -0.0278) calc(var(--corner-radius) * 0.5671), calc(100% + var(--corner-radius) * -0.0182) calc(var(--corner-radius) * 0.6231), calc(100% + var(--corner-radius) * -0.0112) calc(var(--corner-radius) * 0.6787), calc(100% + var(--corner-radius) * -0.0063) calc(var(--corner-radius) * 0.7337), calc(100% + var(--corner-radius) * -0.0032) calc(var(--corner-radius) * 0.7881), calc(100% + var(--corner-radius) * -0.0013) calc(var(--corner-radius) * 0.8418), calc(100% + var(--corner-radius) * -0.0004) calc(var(--corner-radius) * 0.8949), calc(100% + var(--corner-radius) * -0.0000) calc(var(--corner-radius) * 0.9476), calc(100% + var(--corner-radius) * -0.0000) calc(100% + var(--corner-radius) * -0.9476), calc(100% + var(--corner-radius) * -0.0004) calc(100% + var(--corner-radius) * -0.8949), calc(100% + var(--corner-radius) * -0.0013) calc(100% + var(--corner-radius) * -0.8418), calc(100% + var(--corner-radius) * -0.0032) calc(100% + var(--corner-radius) * -0.7881), calc(100% + var(--corner-radius) * -0.0063) calc(100% + var(--corner-radius) * -0.7337), calc(100% + var(--corner-radius) * -0.0112) calc(100% + var(--corner-radius) * -0.6787), calc(100% + var(--corner-radius) * -0.0182) calc(100% + var(--corner-radius) * -0.6231), calc(100% + var(--corner-radius) * -0.0278) calc(100% + var(--corner-radius) * -0.5671), calc(100% + var(--corner-radius) * -0.0406) calc(100% + var(--corner-radius) * -0.5111), calc(100% + var(--corner-radius) * -0.0570) calc(100% + var(--corner-radius) * -0.4555), calc(100% + var(--corner-radius) * -0.0775) calc(100% + var(--corner-radius) * -0.4009), calc(100% + var(--corner-radius) * -0.1026) calc(100% + var(--corner-radius) * -0.3480), calc(100% + var(--corner-radius) * -0.1324) calc(100% + var(--corner-radius) * -0.2974), calc(100% + var(--corner-radius) * -0.1670) calc(100% + var(--corner-radius) * -0.2499), calc(100% + var(--corner-radius) * -0.2063) calc(100% + var(--corner-radius) * -0.2063), calc(100% + var(--corner-radius) * -0.2499) calc(100% + var(--corner-radius) * -0.1670), calc(100% + var(--corner-radius) * -0.2974) calc(100% + var(--corner-radius) * -0.1324), calc(100% + var(--corner-radius) * -0.3480) calc(100% + var(--corner-radius) * -0.1026), calc(100% + var(--corner-radius) * -0.4009) calc(100% + var(--corner-radius) * -0.0775), calc(100% + var(--corner-radius) * -0.4555) calc(100% + var(--corner-radius) * -0.0570), calc(100% + var(--corner-radius) * -0.5111) calc(100% + var(--corner-radius) * -0.0406), calc(100% + var(--corner-radius) * -0.5671) calc(100% + var(--corner-radius) * -0.0278), calc(100% + var(--corner-radius) * -0.6231) calc(100% + var(--corner-radius) * -0.0182), calc(100% + var(--corner-radius) * -0.6787) calc(100% + var(--corner-radius) * -0.0112), calc(100% + var(--corner-radius) * -0.7337) calc(100% + var(--corner-radius) * -0.0063), calc(100% + var(--corner-radius) * -0.7881) calc(100% + var(--corner-radius) * -0.0032), calc(100% + var(--corner-radius) * -0.8418) calc(100% + var(--corner-radius) * -0.0013), calc(100% + var(--corner-radius) * -0.8949) calc(100% + var(--corner-radius) * -0.0004), calc(100% + var(--corner-radius) * -0.9476) calc(100% + var(--corner-radius) * -0.0000), calc(var(--corner-radius) * 0.9476) calc(100% + var(--corner-radius) * -0.0000), calc(var(--corner-radius) * 0.8949) calc(100% + var(--corner-radius) * -0.0004), calc(var(--corner-radius) * 0.8418) calc(100% + var(--corner-radius) * -0.0013), calc(var(--corner-radius) * 0.7881) calc(100% + var(--corner-radius) * -0.0032), calc(var(--corner-radius) * 0.7337) calc(100% + var(--corner-radius) * -0.0063), calc(var(--corner-radius) * 0.6787) calc(100% + var(--corner-radius) * -0.0112), calc(var(--corner-radius) * 0.6231) calc(100% + var(--corner-radius) * -0.0182), calc(var(--corner-radius) * 0.5671) calc(100% + var(--corner-radius) * -0.0278), calc(var(--corner-radius) * 0.5111) calc(100% + var(--corner-radius) * -0.0406), calc(var(--corner-radius) * 0.4555) calc(100% + var(--corner-radius) * -0.0570), calc(var(--corner-radius) * 0.4009) calc(100% + var(--corner-radius) * -0.0775), calc(var(--corner-radius) * 0.3480) calc(100% + var(--corner-radius) * -0.1026), calc(var(--corner-radius) * 0.2974) calc(100% + var(--corner-radius) * -0.1324), calc(var(--corner-radius) * 0.2499) calc(100% + var(--corner-radius) * -0.1670), calc(var(--corner-radius) * 0.2063) calc(100% + var(--corner-radius) * -0.2063), calc(var(--corner-radius) * 0.1670) calc(100% + var(--corner-radius) * -0.2499), calc(var(--corner-radius) * 0.1324) calc(100% + var(--corner-radius) * -0.2974), calc(var(--corner-radius) * 0.1026) calc(100% + var(--corner-radius) * -0.3480), calc(var(--corner-radius) * 0.0775) calc(100% + var(--corner-radius) * -0.4009), calc(var(--corner-radius) * 0.0570) calc(100% + var(--corner-radius) * -0.4555), calc(var(--corner-radius) * 0.0406) calc(100% + var(--corner-radius) * -0.5111), calc(var(--corner-radius) * 0.0278) calc(100% + var(--corner-radius) * -0.5671), calc(var(--corner-radius) * 0.0182) calc(100% + var(--corner-radius) * -0.6231), calc(var(--corner-radius) * 0.0112) calc(100% + var(--corner-radius) * -0.6787), calc(var(--corner-radius) * 0.0063) calc(100% + var(--corner-radius) * -0.7337), calc(var(--corner-radius) * 0.0032) calc(100% + var(--corner-radius) * -0.7881), calc(var(--corner-radius) * 0.0013) calc(100% + var(--corner-radius) * -0.8418), calc(var(--corner-radius) * 0.0004) calc(100% + var(--corner-radius) * -0.8949), calc(var(--corner-radius) * 0.0000) calc(100% + var(--corner-radius) * -0.9476), calc(var(--corner-radius) * 0.0000) calc(var(--corner-radius) * 0.9476), calc(var(--corner-radius) * 0.0004) calc(var(--corner-radius) * 0.8949), calc(var(--corner-radius) * 0.0013) calc(var(--corner-radius) * 0.8418), calc(var(--corner-radius) * 0.0032) calc(var(--corner-radius) * 0.7881), calc(var(--corner-radius) * 0.0063) calc(var(--corner-radius) * 0.7337), calc(var(--corner-radius) * 0.0112) calc(var(--corner-radius) * 0.6787), calc(var(--corner-radius) * 0.0182) calc(var(--corner-radius) * 0.6231), calc(var(--corner-radius) * 0.0278) calc(var(--corner-radius) * 0.5671), calc(var(--corner-radius) * 0.0406) calc(var(--corner-radius) * 0.5111), calc(var(--corner-radius) * 0.0570) calc(var(--corner-radius) * 0.4555), calc(var(--corner-radius) * 0.0775) calc(var(--corner-radius) * 0.4009), calc(var(--corner-radius) * 0.1026) calc(var(--corner-radius) * 0.3480), calc(var(--corner-radius) * 0.1324) calc(var(--corner-radius) * 0.2974), calc(var(--corner-radius) * 0.1670) calc(var(--corner-radius) * 0.2499), calc(var(--corner-radius) * 0.2063) calc(var(--corner-radius) * 0.2063), calc(var(--corner-radius) * 0.2499) calc(var(--corner-radius) * 0.1670), calc(var(--corner-radius) * 0.2974) calc(var(--corner-radius) * 0.1324), calc(var(--corner-radius) * 0.3480) calc(var(--corner-radius) * 0.1026), calc(var(--corner-radius) * 0.4009) calc(var(--corner-radius) * 0.0775), calc(var(--corner-radius) * 0.4555) calc(var(--corner-radius) * 0.0570), calc(var(--corner-radius) * 0.5111) calc(var(--corner-radius) * 0.0406), calc(var(--corner-radius) * 0.5671) calc(var(--corner-radius) * 0.0278), calc(var(--corner-radius) * 0.6231) calc(var(--corner-radius) * 0.0182), calc(var(--corner-radius) * 0.6787) calc(var(--corner-radius) * 0.0112), calc(var(--corner-radius) * 0.7337) calc(var(--corner-radius) * 0.0063), calc(var(--corner-radius) * 0.7881) calc(var(--corner-radius) * 0.0032), calc(var(--corner-radius) * 0.8418) calc(var(--corner-radius) * 0.0013), calc(var(--corner-radius) * 0.8949) calc(var(--corner-radius) * 0.0004), calc(var(--corner-radius) * 0.9476) calc(var(--corner-radius) * 0.0000));
+}
+
+button.basic_2{
+    box-sizing: border-box;
+    padding: .3rem 1rem;
+    font-family: var(--text-font-B);
+    font-size: .9rem;
+    color: #fff;
+    background-color: #1c7aff;
+    border: none;
+    border-radius: 2rem;
+    
+}
+
+textarea {
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 1.2rem;
+    height: 1.5rem;
+    font-family: var(--text-font);
+    background-color: #00000000;
+    border: none;
+    outline: none;
+    color: #ffffff
+}

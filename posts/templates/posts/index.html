@@ -1,0 +1,235 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}ホーム | Sparrow{% endblock %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{% static 'posts/index.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="login_status">
+    <div class="status">
+        <div class="icon_background">
+            {% if current_user.icon %}
+                <img src="{{ current_user.icon.url }}" class="icon">
+            {% endif %}
+        </div>
+        {% if current_user.is_authenticated %}
+        <div class="user">
+            <div class="name"><label>{{ current_user.display_name }}</label> @{{ current_user.username }}</div>
+        {% endif %}
+        </div>
+    </div>
+    {% if current_user.is_authenticated %}
+    <form action="{% url 'logout' %}" method="post" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="logout-button">ログアウト</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="posts-wrapper">
+    <div class="new-post">
+        <div class="icon_background">
+            {% if current_user.icon %}
+                <img src="{{ current_user.icon.url }}" class="icon">
+            {% endif %}
+        </div>
+        {% if current_user.is_authenticated %}
+        <div class="post-content">
+            <div class="name"><label>{{ current_user.display_name }}</label> @{{ current_user.username }}</div>
+        {% endif %}
+            <div class="post-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                        <label class="image-button">
+                            <span class="material-symbols-rounded">add_photo_alternate</span>
+                            {{ form.image }}
+                        </label>
+                    {% if current_user.is_authenticated %}
+                    <div class="post_button"><button type="submit" class="basic">ポスト</button></div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    {% for post in posts %}
+    <div class="unit">
+        <div class="post">
+            <div class="icon_background">
+                <img src="{{ post.author.icon.url }}" class="icon">
+            </div>
+            <div class="post-content">
+                <div class="name"><label>{{ post.author.display_name }}</label> @{{ post.author.username }}</div>
+
+                <div class="post-body">
+                    {{ post.content|linebreaksbr}}
+                </div>
+            </div>
+        </div>
+        <div class="post-footer">
+            {% if current_user.is_authenticated %}
+        <div class="comment-form">
+            <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
+            <button type="button" class="comment-btn" data-post-id="{{ post.post_id }}">送信</button>
+        </div>
+            {% endif %}
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                {% if post.is_liked %}
+                    <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}">
+                        <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
+                    </button>
+                {% else %}
+                    <button type="button" class="unlike like-btn" data-post-id="{{ post.post_id }}">
+                        <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
+                    </button>
+                {% endif %}
+            </form>
+            <span>ポストID:{{ post.post_id }}</span>
+            <span>{{ post.created_at }}</span>
+        </div>
+
+        <!-- コメント一覧 -->
+        <div class="comment-list" data-post-id="{{ post.post_id }}">
+            {% for comment in post.comments.all %}
+                <div class="comment">
+                    <div class="icon_background">
+                        {% if comment.user.icon %}
+                        <img src="{{ comment.user.icon.url }}" class="icon">
+                        {% endif %}
+                    </div>
+                    {% if current_user.is_authenticated %}
+                    <div class="post-content">
+                        <div class="name"><label>{{ comment.user.display_name }}</label> @{{ comment.user.username }}</div>
+                    {% endif %}
+                        <p class="comment-text">{{ comment.text }}</p>
+                        <span class="comment-time">{{ comment.created_at }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.autoresize').forEach(textarea => {
+        // ページ読み込み時にも高さ調整（編集時に必要）
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+
+        // 入力時の自動調整
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const likeButtons = document.querySelectorAll(".like-btn");
+
+    likeButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            const postId = this.dataset.postId;
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+            const btn = this;
+
+            fetch("{% url 'posts:toggle_like' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `post_id=${postId}`
+            })
+
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    // ボタンのクラス切替
+                    if (data.is_liked) {
+                        btn.classList.remove("unlike");
+                        btn.classList.add("liked");
+                    } else {
+                        btn.classList.remove("liked");
+                        btn.classList.add("unlike");
+                    }
+
+                    // いいね数を更新
+                    const footer = btn.closest(".post-footer");
+                    if (footer) {
+                        const likeCountSpan = footer.querySelector(".like-count");
+                        if (likeCountSpan) {
+                            likeCountSpan.textContent = `${data.like_count}`;
+                        }
+                    }
+                }
+            });
+        });
+    });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const commentButtons = document.querySelectorAll(".comment-btn");
+
+    commentButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            const postId = this.dataset.postId;
+            const textarea = document.querySelector(`.autoresize_new[data-post-id="${postId}"]`);
+            const text = textarea.value.trim();
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+            if (!text) return;
+
+            const formData = new FormData();
+            formData.append("text", text);
+
+            fetch(`/add_comment/${postId}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": csrfToken },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+
+                // ポストIDに紐づくコメントリスト
+                const commentList = document.querySelector(`.comment-list[data-post-id="${postId}"]`);
+                if (!commentList) return;
+
+                // 新しいコメントを作成
+                const newComment = document.createElement("div");
+                newComment.classList.add("comment");
+                newComment.dataset.commentId = data.comment_id;
+
+                newComment.innerHTML = `
+                    ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
+                    <span>${data.display_name} @${data.username}</span>
+                    <p>${data.text}</p>
+                    <span>${data.created_at}</span>
+                `;
+
+                // コメントリストの先頭に追加
+                commentList.prepend(newComment);
+
+                // テキストエリアをクリア
+                textarea.value = "";
+            });
+        });
+    });
+});
+
+</script>
+
+{% endblock %}
