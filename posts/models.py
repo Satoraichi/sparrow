@@ -25,6 +25,13 @@ class Post(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    quoted_post = models.ForeignKey(
+        "self",
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="quoted_by"
+    )
+
     def save(self, *args, **kwargs):
         if not self.post_id:
             # 13桁 → 12桁にトリム
@@ -33,6 +40,8 @@ class Post(models.Model):
 
     class Meta:
         ordering = ["-post_id"]  # post_id 降順（新しい投稿が上）
+
+    repost = models.BooleanField(default=False)
 
 class Comment(models.Model):
     comment_id = models.CharField(max_length=12, unique=True, editable=False)

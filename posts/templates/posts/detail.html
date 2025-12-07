@@ -1,10 +1,10 @@
 {% extends "posts/base.html" %}
 {% load static %}
 
-{% block title %}ホーム | Sparrow{% endblock %}
+{% block title %}ポスト | Sparrow{% endblock %}
 
 {% block extra_style %}
-<link rel="stylesheet" href="{% static 'posts/index.css' %}">
+<link rel="stylesheet" href="{% static 'posts/detail.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -43,140 +43,136 @@
 </div>
 
 <div class="posts-wrapper">
-    <div class="new-post">
-        <div class="icon_background">
-            {% if current_user.icon %}
-                <img src="{{ current_user.icon.url }}" class="icon">
-            {% endif %}
-        </div>
-        {% if current_user.is_authenticated %}
-        <div class="post-content">
-            <div class="name"><label>{{ current_user.display_name }}</label> @{{ current_user.username }}</div>
-        {% endif %}
-            <div class="post-body">
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    {{ form.as_p }}
-                    
-                    <div id="post-image-wrapper" style="display: none; margin-top: 10px; border: 1px solid #333; border-radius: 8px; padding: 10px; position: relative;">
-                        <img id="preview-image" src="#" alt="Image Preview" style="max-width: 100%; max-height: 200px; border-radius: 6px;">
-                        <button type="button" id="clear-image-btn" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; text-align: center; cursor: pointer;">
-                            &times;
-                        </button>
-                    </div>
+    <h2 style="color: #fff; margin-bottom: 1rem;">ポスト詳細</h2>
 
-                    <div class="image-button-wrapper" style="display: flex; align-items: center; gap: 10px;">
-                        <span class="material-symbols-rounded" id="image-upload-icon" style="cursor: pointer; color: #ffffff88;">
-                            add_photo_alternate
-                        </span>
-
-                        {{ form.image }} 
-                    </div>
+    <div class="unit"> 
+        <div class="post">
+            <div class="icon_background">
+                <img src="{{ post.author.icon.url }}" class="icon">
+            </div>
+            
+            <div class="post-content">
+                <div class="name">
+                    <label>{{ post.author.display_name }}</label> @{{ post.author.username }}
+                    <span style="margin-left: auto; font-size: 1rem; color: #d8d8d8;">
+                        {{ post.created_at|timesince }}前
+                    </span>
                     
-                    {% if current_user.is_authenticated %}
-                    <div class="post_button"><button type="submit" class="basic">ポスト</button></div>
+                    {% if current_user == post.author %}
+                    <button class="delete-btn" data-post-id="{{ post.post_id }}">
+                        <span class="material-symbols-rounded">delete</span>
+                    </button>
                     {% endif %}
-                </form>
+                </div>
+
+                <div class="post-body">
+                    {{ post.content|linebreaksbr}}
+                    {% if post.image %}
+                        <p style="color: yellow; font-size: 0.8rem;">
+                            画像ファイルがDBにあります: 
+                            <a href="{{ post.image.url }}" target="_blank">{{ post.image.url }}</a>
+                        </p>
+                        
+                        <div class="post-image">
+                            <img src="{{ post.image.url }}" alt="投稿画像" >
+                        </div>
+                    {% else %}
+                        <p style="color: gray; font-size: 0.8rem;">画像ファイルなし</p>
+                    {% endif %}
+                    </div>
+                    </div>
             </div>
         </div>
-    </div>
-    {% for post in posts %}
-    {% if post %}
-        <div class="unit">
-            <div class="post">
+        
+        {% if post.quoted_post %}
+        <div class="unit quoted-unit" data-post-id="{{ post.quoted_post.post_id }}">
+            <div class="post quoted-post">
                 <div class="icon_background">
-                    <img src="{{ post.author.icon.url }}" class="icon">
+                    {% if post.quoted_post.author.icon %}
+                        <img src="{{ post.quoted_post.author.icon.url }}" class="icon">
+                    {% endif %}
                 </div>
+
                 <div class="post-content">
-                    <div class="name"><label>{{ post.author.display_name }}</label> @{{ post.author.username }}<span style="margin-left: auto; font-size: 1rem; color: #d8d8d8;">{{ post.created_at|timesince }}前</span>
-                        {% if current_user == post.author %}
-                        <button class="delete-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
-                            <span class="material-symbols-rounded">delete</span>
-                        </button>
-                        {% endif %}
+                    <div class="name">
+                        <label>{{ post.quoted_post.author.display_name }}</label>
+                        @{{ post.quoted_post.author.username }}
+                        <span style="margin-left: auto; font-size: 0.9rem; color: #bdbdbd;">
+                            {{ post.quoted_post.created_at|timesince }}前
+                        </span>
                     </div>
 
                     <div class="post-body">
-                        {{ post.content|linebreaksbr}}
-                            {% if post.image %}
+                        {{ post.quoted_post.content|linebreaksbr }}
+                        {% if post.quoted_post.image %}
                             <div class="post-image">
-                                <img src="{{ post.image.url }}" alt="投稿画像">
+                                <img src="{{ post.quoted_post.image.url }}" alt="quoted image">
                             </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
-            {% if post.quoted_post %}
-            <div class="unit quoted-unit" data-post-id="{{ post.quoted_post.post_id }}">
-                <a href="{% url 'posts:detail' post.quoted_post.post_id %}" class="post-link"></a>
-                <div class="post quoted-post">
-                    <div class="icon_background">
-                        {% if post.quoted_post.author.icon %}
-                            <img src="{{ post.quoted_post.author.icon.url }}" class="icon">
-                        {% endif %}
-                    </div>
-
-                    <div class="post-content">
-                        <div class="name">
-                            <label>{{ post.quoted_post.author.display_name }}</label>
-                            @{{ post.quoted_post.author.username }}
-                            <span style="margin-left: auto; font-size: 0.9rem; color: #bdbdbd;">
-                                {{ post.quoted_post.created_at|timesince }}前
-                            </span>
-                        </div>
-
-                        <div class="post-body">
-                            {{ post.quoted_post.content|linebreaksbr }}
-                            {% if post.quoted_post.image %}
-                                <div class="post-image">
-                                    <img src="{{ post.quoted_post.image.url }}" alt="quoted image">
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+        </div>
+        {% elif post.repost and not post.quoted_post %}
+        <div class="unit quoted-unit">
+            <div class="post quoted-post">
+                <div class="none"><p>このポストは削除されています。</p></div>
             </div>
-            {% elif post.repost and not post.quoted_post %}
-            <div class="unit quoted-unit">
-                <div class="post quoted-post">
-                    <div class="none"><p>このポストは削除されています。</p></div>
-                </div>
+        </div>
+        {% endif %}
+        
+        <div class="post-footer">
+            <div class="buttons">
+                <button class="comment-btn" onclick="location.href='{% url 'posts:detail' post.post_id %}'" style="text-decoration: none;">
+                    <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="like-count">{{ post.comment_count }}</span>
+                </button>
+                <form method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    {% if post.is_liked %}
+                        <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
+                            <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
+                        </button>
+                    {% else %}
+                        <button type="button" class="unlike like-btn" data-post-id="{{ post.post_id }}">
+                            <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
+                        </button>
+                    {% endif %}
+                </form>
+                <button class="quote-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
+                    <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ post.quote_count }}</span>
+                </button>
+            </div>
+            <span>ポストID:{{ post.post_id }}</span>
+        </div>
+            {% if current_user.is_authenticated %}
+            <div class="comment-form">
+                <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
+                <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
+                <button type="button" class="comment-btn" data-post-id="{{ post.post_id }}">送信</button>
             </div>
             {% endif %}
-            <div class="post-footer">
-                <div class="buttons">
-                    <button class="comment-btn" onclick="location.href='{% url 'posts:detail' post.post_id %}'" style="text-decoration: none;">
-                        <span class="material-symbols-rounded">chat_bubble</span><span class="like-count">{{ post.comment_count }}</span>
-                    </button>
-                    <form method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        {% if post.is_liked %}
-                            <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
-                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
-                            </button>
-                        {% else %}
-                            <button type="button" class="unlike like-btn" data-post-id="{{ post.post_id }}">
-                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
-                            </button>
+
+        <div class="comment-list" data-post-id="{{ post.post_id }}">
+            {% for comment in post.comments.all %}
+                <div class="comment">
+                    <div class="icon_background">
+                        {% if comment.user.icon %}
+                        <img src="{{ comment.user.icon.url }}" class="icon">
                         {% endif %}
-                    </form>
-                    <button class="quote-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
-                        <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ post.quote_count }}</span>
-                    </button>
+                    </div>
+                    {% if current_user.is_authenticated %}
+                    <div class="post-content">
+                        <div class="name"><label>{{ comment.user.display_name }}</label> @{{ comment.user.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span></div>
+                    {% endif %}
+                        <p class="comment-text">{{ comment.text }}</p>
+                    </div>
                 </div>
-                <span>ポストID:{{ post.post_id }}</span>
-            </div>
-            <a href="{% url 'posts:detail' post.post_id %}" class="post-link"></a>
+            {% endfor %}
         </div>
-    {% else %}
-    <p>静かですね…</p>
-    {% endif %}
-    {% endfor %}
+    </div>
 </div>
 
 <script>
-console.log("--- スクリプト実行開始 ---"); // これが表示されるか？
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
@@ -397,64 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault(); // フォームのデフォルトの送信動作をキャンセル
         }
     });
-
-    /* =========================================================
-        画像プレビュー機能 (最終安定版)
-    ========================================================== */
-    const imageInput = document.getElementById('id_image'); 
-    const imageIcon = document.getElementById('image-upload-icon'); 
-    const previewWrapper = document.getElementById('post-image-wrapper');
-    const previewImage = document.getElementById('preview-image');
-    const clearImageBtn = document.getElementById('clear-image-btn');
-    
-    // 💡 アイコンの初期色を定義 (ユーザーのCSSに合わせて適宜変更してください)
-    const INITIAL_ICON_COLOR = '#ffffff88'; 
-    const SUCCESS_ICON_COLOR = '#4CAF50'; 
-
-    if (imageInput && imageIcon && previewWrapper && previewImage && clearImageBtn) {
-        
-        // 1. アイコンクリックでファイル選択ダイアログを開く
-        imageIcon.addEventListener('click', function() {
-            imageInput.click(); // 隠された input を強制的にクリック
-        });
-        
-        // 2. ファイル選択後の 'change' イベント（プレビュー/リセットの本体）
-        imageInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            
-            if (file) {
-                // ファイルがある場合: プレビューを表示し、アイコンを緑色にする
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    // CSSの上書きを回避するため、!importantで強制表示
-                    previewWrapper.style.setProperty('display', 'block', 'important'); 
-                };
-                reader.readAsDataURL(file);
-                imageIcon.style.color = SUCCESS_ICON_COLOR;
-                clearImageBtn.style.display = 'block'; // クリアボタンを表示
-            } else {
-                // ファイルがない場合: プレビューを非表示にし、アイコンを初期色に戻す
-                previewWrapper.style.setProperty('display', 'none', 'important');
-                imageIcon.style.color = INITIAL_ICON_COLOR;
-                clearImageBtn.style.display = 'none'; // クリアボタンを非表示
-            }
-        });
-
-        // 3. クリアボタンイベント (バツボタンの処理)
-        clearImageBtn.addEventListener('click', function() {
-            // 🚨 ファイル入力をリセット（これによって files.length が 0 になる）
-            imageInput.value = ''; 
-
-            // 💡 change イベントを手動で発火させる
-            //    これにより、上記の if/else ロジックの 'else' ブロックが実行され、
-            //    プレビュー非表示とアイコン色リセットが一括で行われる。
-            imageInput.dispatchEvent(new Event('change')); 
-        });
-
-    } else {
-        console.error("画像プレビューの初期化に失敗しました。HTML要素のIDを確認してください。");
-    }
 });
 </script>
 
