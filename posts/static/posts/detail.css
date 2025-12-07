@@ -253,7 +253,7 @@ form input[type="file"] {
 
 .unit{
     padding: 1rem 0;
-    border-bottom: .1rem solid #8d8d8d44;
+    border-bottom: none;
     position: relative;
 }
 

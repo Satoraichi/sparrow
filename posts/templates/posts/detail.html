@@ -67,20 +67,12 @@
 
                 <div class="post-body">
                     {{ post.content|linebreaksbr}}
-                    {% if post.image %}
-                        <p style="color: yellow; font-size: 0.8rem;">
-                            画像ファイルがDBにあります: 
-                            <a href="{{ post.image.url }}" target="_blank">{{ post.image.url }}</a>
-                        </p>
-                        
+                        {% if post.image %}
                         <div class="post-image">
-                            <img src="{{ post.image.url }}" alt="投稿画像" >
+                            <img src="{{ post.image.url }}" alt="投稿画像">
                         </div>
-                    {% else %}
-                        <p style="color: gray; font-size: 0.8rem;">画像ファイルなし</p>
                     {% endif %}
-                    </div>
-                    </div>
+                </div>
             </div>
         </div>
         
