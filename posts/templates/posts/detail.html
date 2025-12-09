@@ -1,9 +1,10 @@
 {% extends "posts/base.html" %}
 {% load static %}
 
-{% block title %}ポスト | Sparrow{% endblock %}
+{% block title %}"{{ post.content|linebreaksbr}}" by {{ current_user.display_name }} | Sparrow{% endblock %}
 
 {% block extra_style %}
+<link rel="preload" href="{% static 'posts/detail.css' %}" as="style">
 <link rel="stylesheet" href="{% static 'posts/detail.css' %}">
 {% endblock %}
 
@@ -67,20 +68,12 @@
 
                 <div class="post-body">
                     {{ post.content|linebreaksbr}}
-                    {% if post.image %}
-                        <p style="color: yellow; font-size: 0.8rem;">
-                            画像ファイルがDBにあります: 
-                            <a href="{{ post.image.url }}" target="_blank">{{ post.image.url }}</a>
-                        </p>
-                        
+                        {% if post.image %}
                         <div class="post-image">
-                            <img src="{{ post.image.url }}" alt="投稿画像" >
+                            <img src="{{ post.image.url }}" class="post-image-thumbnail" alt="投稿画像">
                         </div>
-                    {% else %}
-                        <p style="color: gray; font-size: 0.8rem;">画像ファイルなし</p>
                     {% endif %}
-                    </div>
-                    </div>
+                </div>
             </div>
         </div>
         
@@ -173,6 +166,7 @@
 </div>
 
 <script>
+console.log("--- スクリプト実行開始 ---"); // これが表示されるか？
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
@@ -391,6 +385,99 @@ document.addEventListener("DOMContentLoaded", () => {
         // ユーザーがキャンセルした場合、フォームの送信を中止する
         if (!confirm("本当にログアウトしますか？")) {
             event.preventDefault(); // フォームのデフォルトの送信動作をキャンセル
+        }
+    });
+
+    /* =========================================================
+        画像プレビュー機能 (最終安定版)
+    ========================================================== */
+    const imageInput = document.getElementById('id_image'); 
+    const imageIcon = document.getElementById('image-upload-icon'); 
+    const previewWrapper = document.getElementById('post-image-wrapper');
+    const previewImage = document.getElementById('preview-image');
+    const clearImageBtn = document.getElementById('clear-image-btn');
+    
+    // 💡 アイコンの初期色を定義 (ユーザーのCSSに合わせて適宜変更してください)
+    const INITIAL_ICON_COLOR = '#ffffff88'; 
+    const SUCCESS_ICON_COLOR = '#4CAF50'; 
+
+    if (imageInput && imageIcon && previewWrapper && previewImage && clearImageBtn) {
+        
+        // 1. アイコンクリックでファイル選択ダイアログを開く
+        imageIcon.addEventListener('click', function() {
+            imageInput.click(); // 隠された input を強制的にクリック
+        });
+        
+        // 2. ファイル選択後の 'change' イベント（プレビュー/リセットの本体）
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                // ファイルがある場合: プレビューを表示し、アイコンを緑色にする
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    // CSSの上書きを回避するため、!importantで強制表示
+                    previewWrapper.style.setProperty('display', 'block', 'important'); 
+                };
+                reader.readAsDataURL(file);
+                imageIcon.style.color = SUCCESS_ICON_COLOR;
+                clearImageBtn.style.display = 'block'; // クリアボタンを表示
+            } else {
+                // ファイルがない場合: プレビューを非表示にし、アイコンを初期色に戻す
+                previewWrapper.style.setProperty('display', 'none', 'important');
+                imageIcon.style.color = INITIAL_ICON_COLOR;
+                clearImageBtn.style.display = 'none'; // クリアボタンを非表示
+            }
+        });
+
+        // 3. クリアボタンイベント (バツボタンの処理)
+        clearImageBtn.addEventListener('click', function() {
+            // 🚨 ファイル入力をリセット（これによって files.length が 0 になる）
+            imageInput.value = ''; 
+
+            // 💡 change イベントを手動で発火させる
+            //    これにより、上記の if/else ロジックの 'else' ブロックが実行され、
+            //    プレビュー非表示とアイコン色リセットが一括で行われる。
+            imageInput.dispatchEvent(new Event('change')); 
+        });
+
+    } else {
+        console.error("画像プレビューの初期化に失敗しました。HTML要素のIDを確認してください。");
+    }
+
+    /* =========================================================
+        7) 画像モーダル処理
+    ========================================================== */
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const closeImageModal = document.getElementById('closeImageModal');
+    const thumbnails = document.querySelectorAll('.post-image-thumbnail'); // 全ての投稿画像を取得
+
+    // 1. サムネイル画像をクリックしたときの処理
+    thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+            // クリックされた画像の URL を取得
+            const imageUrl = this.src; 
+            
+            // モーダル画像に URL を設定
+            modalImage.src = imageUrl; 
+            
+            // モーダルを表示
+            imageModal.style.display = 'block';
+        });
+    });
+
+    // 2. 閉じるボタン (×) をクリックしたときの処理
+    closeImageModal.addEventListener('click', function() {
+        imageModal.style.display = 'none';
+    });
+
+    // 3. モーダルの背景をクリックしたときの処理 (モーダル全体)
+    imageModal.addEventListener('click', function(e) {
+        // クリックされた要素がモーダル自身（背景）であれば閉じる
+        if (e.target === imageModal) {
+            imageModal.style.display = 'none';
         }
     });
 });

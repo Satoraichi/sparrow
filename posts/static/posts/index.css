@@ -167,6 +167,16 @@ main{
     margin-right: .4rem;
 }
 
+button#closeModal{
+    background-color:#ff492d;
+    color: #fff;
+}
+
+button#closeModal:hover{
+    background: #ffe7e3;
+    color: #ef2e10;
+}
+
 .posts-wrapper{
     box-sizing: border-box;
     width: 60%;
@@ -181,7 +191,7 @@ main{
 }
 
 .posts-wrapper::-webkit-scrollbar{
-  display:none;
+    display:none;
 }
 
 .new-post{

@@ -4,7 +4,8 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}ログイン | Sparrow{% endblock %}</title>
-        <link rel="stylesheet" href="{% static 'posts/base.css' %}">
+        <link rel="preload" href="{% static 'posts/base.css' %}" as="style">
+        <link rel="stylesheet" href="{% static 'posts/base.css' %}" />
         {% comment %} Material Symbols Rounded {% endcomment %}
         <link rel="preload"
             as="style" 
