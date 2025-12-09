@@ -310,20 +310,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* =========================================================
-        4) コメント投稿
+        4) コメント投稿 (Postモデル対応版)
     ========================================================== */
 
     document.querySelectorAll(".comment-btn").forEach(button => {
         button.addEventListener("click", () => {
             const postId = button.dataset.postId;
             const textarea = document.querySelector(`.autoresize_new[data-post-id="${postId}"]`);
-            const text = textarea.value.trim();
+            const text = textarea.value.trim(); // フォームから本文を取得
             const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
             if (!text) return;
 
             const formData = new FormData();
-            formData.append("text", text);
+            formData.append("text", text); // サーバーは 'text' として受け取る
 
             fetch(`/add_comment/${postId}/`, {
                 method: "POST",
@@ -334,50 +334,33 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 if (data.error) return;
 
-                const commentList = document.querySelector(`.comment-list[data-post-id="${postId}"]`);
+                // 成功レスポンスのチェック (data.ok)
+                if (data.ok) { 
+                    const commentList = document.querySelector(`.comment-list[data-post-id="${postId}"]`);
+                    
+                    // コメントを DOM に追加
+                    const newComment = document.createElement("div");
+                    newComment.classList.add("comment");
+                    
+                    // ★★★ 修正点: data.content, data.display_name, data.username, data.icon_url を使用 ★★★
+                    newComment.innerHTML = `
+                        <div class="icon_background">
+                            ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
+                        </div>
+                        <div class="post-content">
+                            <div class="name">
+                                <label>${data.display_name}</label> @${data.username}
+                                </div>
+                            <p class="reply-base"> 返信先： @${data.original_author_username || ''}</p> 
+                            <div class="post-body">
+                                ${data.content.replace(/\n/g, '<br>')} </div>
+                        </div>
+                    `;
 
-                const newComment = document.createElement("div");
-                newComment.classList.add("comment");
-                newComment.innerHTML = `
-                    <div class="icon_background">
-                        ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
-                    </div>
-                    <div class="post-content">
-                        <div class="name"><label>${data.display_name}</label> @${data.username}</div>
-                        <p class="comment-text">${data.text}</p>
-                    </div>
-                `;
-
-                commentList.prepend(newComment);
-                textarea.value = "";
-            });
-        });
-    });
-    
-    /* =========================================================
-        5) 投稿削除
-    ========================================================== */
-
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (!confirm("このポストを削除しますか？")) return;
-
-            const postId = btn.dataset.postId;
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-
-            fetch(`/delete/${postId}/`, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    // 削除対象の投稿を画面から消す
-                    const unit = btn.closest(".unit");
-                    if (unit) unit.remove();
+                    commentList.prepend(newComment);
+                    textarea.value = ""; // テキストエリアをクリア
+                    
+                    // 画面上のコメント数カウンターを更新するロジックが必要な場合、ここに追加
                 }
             });
         });

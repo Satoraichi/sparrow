@@ -81,24 +81,33 @@ def toggle_like(request):
 def add_comment(request, post_id):
     if request.method == 'POST':
         original_post = get_object_or_404(Post, post_id=post_id)
-        
-        # フォームまたはリクエストデータから内容を取得
         content = request.POST.get('text')
         
         if content:
-            # ★ 3. Postモデルとしてコメントを作成 ★
-            Post.objects.create(
+            # Postモデルとしてコメントを作成
+            new_comment = Post.objects.create(
                 author=request.user,
                 content=content,
-                commented_post=original_post  # 元のポストIDを紐付ける
+                commented_post=original_post
             )
+
+            original_author_username = original_post.author.username
             
-            # コメント投稿に成功したら、元のポストの詳細ページへリダイレクトするのが一般的です
-            # ただし、ここでは JSON を返すことが期待されているかもしれないため、成功レスポンスを返します
-            return JsonResponse({"ok": True, "message": "Comment added successfully"})
+            # ★★★ 修正点: 新しいコメントの情報をJSONで返す ★★★
+            return JsonResponse({
+                "ok": True,
+                "post_id": new_comment.post_id,
+                # ユーザー情報 (authorから取得)
+                "username": new_comment.author.username,
+                "display_name": new_comment.author.display_name,
+                "icon_url": new_comment.author.icon.url if new_comment.author.icon else None,
+                # コメント本文
+                "content": new_comment.content,
+                # 投稿時間 (JS側で timesince を処理しない場合はこちらで文字列化)
+                # "created_at": new_comment.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                "original_author_username": original_author_username
+            })
     
-    # ユーザーが認証済みではない場合 (login_requiredが適用されているため不要だが、保険として)
-    # またはGETリクエストの場合は、エラーではなくリダイレクトなどが適切だが、元のコードに合わせて400を返す
     return JsonResponse({"error": "Invalid request or content missing"}, status=400)
 
 @login_required
