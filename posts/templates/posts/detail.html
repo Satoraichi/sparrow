@@ -146,18 +146,24 @@
             {% endif %}
 
         <div class="comment-list" data-post-id="{{ post.post_id }}">
-            {% for comment in post.comments.all %}
+            {% for comment in comments %}
                 <div class="comment">
                     <div class="icon_background">
-                        {% if comment.user.icon %}
-                        <img src="{{ comment.user.icon.url }}" class="icon">
+                        {% if comment.author.icon %}
+                        <img src="{{ comment.author.icon.url }}" class="icon">
                         {% endif %}
                     </div>
-                    {% if current_user.is_authenticated %}
                     <div class="post-content">
-                        <div class="name"><label>{{ comment.user.display_name }}</label> @{{ comment.user.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span></div>
-                    {% endif %}
-                        <p class="comment-text">{{ comment.text }}</p>
+                        <div class="name"><label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span></div>
+                        <p class="reply-base"> 返信先： @{{ post.author.username }}</p>
+                        <div class="post-body">
+                            {{ comment.content|linebreaksbr}}
+                                {% if comment.image %}
+                                <div class="post-image">
+                                    <img src="{{ comment.image.url }}" class="post-image-thumbnail" alt="投稿画像">
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
