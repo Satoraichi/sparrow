@@ -137,16 +137,18 @@
             </div>
             <span>ポストID:{{ post.post_id }}</span>
         </div>
-            {% if current_user.is_authenticated %}
-            <div class="comment-form">
-                <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
-                <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
-                <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
-            </div>
-            {% endif %}
+    </div>
+        {% if current_user.is_authenticated %}
+        <div class="comment-form">
+            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
+            <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
+            <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
+        </div>
+        {% endif %}
 
         <div class="comment-list" data-post-id="{{ post.post_id }}">
             {% for comment in comments %}
+            <div class="comment-unit">
                 <div class="comment">
                     <div class="icon_background">
                         {% if comment.author.icon %}
@@ -154,7 +156,14 @@
                         {% endif %}
                     </div>
                     <div class="post-content">
-                        <div class="name"><label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span></div>
+                        <div class="name">
+                            <label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span>
+                            {% if current_user == comment.author %}
+                            <button class="delete-comment-btn" data-comment-id="{{ comment.post_id }}" data-original-post-id="{{ post.post_id }}">
+                                <span class="material-symbols-rounded">delete</span>
+                            </button>
+                            {% endif %}
+                        </div>
                         <p class="reply-base"> 返信先： @{{ post.author.username }}</p>
                         <div class="post-body">
                             {{ comment.content|linebreaksbr}}
@@ -166,13 +175,38 @@
                         </div>
                     </div>
                 </div>
+                <div class="post-footer">
+                    <div class="buttons">
+                        <button class="comment-btn" data-post-id="{{ comment.post_id }}" style="text-decoration: none;">
+                            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
+                        </button>
+                        
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            {% if comment.is_liked %}
+                                <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
+                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                                </button>
+                            {% else %}
+                                <button type="button" class="unlike like-btn" data-post-id="{{ comment.post_id }}">
+                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                        <button class="quote-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
+                            <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ comment.quote_count }}</span>
+                        </button>
+                    </div>
+                    <span>コメントID:{{ comment.post_id }}</span>
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
 </div>
 
 <script>
-console.log("--- スクリプト実行開始 ---"); // これが表示されるか？
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
@@ -389,7 +423,54 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* =========================================================
-        6) ログアウト警告
+        5) コメント削除
+    ========================================================== */
+
+    document.querySelectorAll(".delete-comment-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (!confirm("このコメントを削除しますか？")) {
+                return;
+            }
+
+            const commentId = btn.dataset.commentId;
+            const originalPostId = btn.dataset.originalPostId; // コメント数更新用
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+            const parentComment = btn.closest(".comment"); // 削除対象のコメント要素
+
+            fetch(`/delete/${commentId}/`, { // 既存の delete_post ビューを再利用
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    // 1. コメントを画面から削除
+                    if (parentComment) {
+                        parentComment.remove();
+                    }
+                    
+                    // 2. コメント数を更新
+                    if (data.new_comment_count !== undefined) {
+                        const commentCountElement = document.querySelector(`.comment-count[data-post-id="${originalPostId}"]`);
+                        if (commentCountElement) {
+                            commentCountElement.textContent = data.new_comment_count;
+                        }
+                    }
+                } else {
+                    console.error("コメント削除失敗:", data.error);
+                }
+            })
+            .catch(error => {
+                console.error("ネットワークエラー:", error);
+            });
+        });
+    });
+
+    /* =========================================================
+        7) ログアウト警告
     ========================================================== */
 
     document.querySelector(".logout-form").addEventListener("submit", function(event) {

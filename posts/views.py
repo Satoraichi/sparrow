@@ -5,16 +5,19 @@ from django.http import Http404, JsonResponse
 from .models import Like, Post # 1. Comment のインポートを削除
 from django.db.models import Count
 import json
+from django.db.models import Count, Case, When, BooleanField
 
 def index(request):
-    # [2] クエリセットの取得とアノテーション（集計）
-    posts = Post.objects.select_related('author', 'quoted_post', 'quoted_post__author') \
-                        .annotate(
-                            like_count_anno=Count('likes', distinct=True),      # いいね数を集計
-                            comment_count_anno=Count('comments', distinct=True), # コメント数を集計
-                            quote_count_anno=Count('quoted_post__quoted_by', distinct=True) # 引用数(リポスト数)を集計
-                        ) \
-                        .order_by("-post_id")
+    posts = (
+            Post.objects.select_related('author', 'quoted_post', 'quoted_post__author')
+            .filter(commented_post__isnull=True)
+            .annotate(
+                like_count_anno=Count('likes', distinct=True),
+                comment_count_anno=Count('comments', distinct=True),
+                quote_count_anno=Count('quoted_post__quoted_by', distinct=True)
+            )
+            .order_by("-post_id")
+        )
                         
     # 新規投稿処理（元のまま）
     if request.method == "POST":
@@ -134,22 +137,41 @@ def timeline(request):
     posts = Post.objects.select_related("quoted_post").order_by("-created_at")
     return render(request, "timeline.html", {"posts": posts})
 
+# posts/views.py (delete_post 関数) の修正
+
+@login_required
 def delete_post(request, post_id):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"})
 
-    post = get_object_or_404(Post, post_id=post_id)
+    post_to_delete = get_object_or_404(Post, post_id=post_id)
 
     # 投稿者のみ削除可能
-    if request.user != post.author:
+    if request.user != post_to_delete.author:
         return JsonResponse({"error": "Permission denied"})
+        
+    # ★ コメントだった場合、親投稿のIDを取得しておく ★
+    original_post_id = post_to_delete.commented_post.post_id if post_to_delete.commented_post else None
 
-    post.delete()
-    return JsonResponse({"ok": True})
+    post_to_delete.delete()
+    
+    # ★ 削除されたのがコメントだった場合、コメント数を再計算して返す ★
+    new_comment_count = None
+    if original_post_id:
+        try:
+            original_post = Post.objects.get(post_id=original_post_id)
+            new_comment_count = original_post.comments.count()
+        except Post.DoesNotExist:
+            pass # 元の投稿が既に削除されていた場合は無視
+
+    return JsonResponse({
+        "ok": True,
+        "new_comment_count": new_comment_count # コメント数を含めて返す
+    })
 
 def post_detail(request, post_id): 
     # 4. 関数が重複定義されていたため、統合されたロジックを使用
-
+    current_user = request.user
     # データベース検索と集計 (annotate) を同時に実行
     post = get_object_or_404(
         Post.objects.select_related('author', 'quoted_post', 'quoted_post__author')
@@ -162,6 +184,37 @@ def post_detail(request, post_id):
                     ), 
         post_id=post_id # post_id (CharField) で検索
     )
+
+    comments = Post.objects.select_related('author') \
+                           .filter(commented_post__post_id=post_id) \
+                           .annotate(
+                               # コメントにユーザーがいいねしているかの判定 (is_liked_anno) を追加
+                               is_liked_anno=Case(
+                                   When(likes__user=current_user, then=True),
+                                   default=False,
+                                   output_field=BooleanField()
+                               ),
+                               like_count_anno=Count('likes', distinct=True),
+                               quote_count_anno=Count('quoted_post__quoted_by', distinct=True),
+                               comment_count_anno=Count('comments', distinct=True),
+                           ) \
+                           .order_by("post_id")
+    
+    comment_list = []
+    for comment in comments:
+        comment_list.append({
+            'post_id': comment.post_id,
+            'content': comment.content,
+            'author': comment.author,
+            'created_at': comment.created_at,
+            'image': comment.image,
+            # ★★★ ここで is_liked の値を設定 ★★★
+            'is_liked': comment.is_liked_anno,
+            'like_count': comment.like_count_anno,
+            'quote_count': comment.quote_count_anno,
+            'comment_count': comment.comment_count_anno,
+            # commented_post はコメント元の投稿なので不要
+        })
     
     # テンプレートでアクセスしやすいように、集計結果を属性として割り当てる
     post.like_count = post.like_count_anno
@@ -181,5 +234,6 @@ def post_detail(request, post_id):
         'post': post,
         'comments': comments,
         'current_user': request.user,
+        'comments': comment_list,
     }
     return render(request, 'posts/detail.html', context)
