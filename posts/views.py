@@ -1,11 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import PostForm
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
-from django.http import Http404
-from .models import Comment, Like, Post
+from django.http import Http404, JsonResponse
+from .models import Like, Post # 1. Comment のインポートを削除
 from django.db.models import Count
-from django.http import JsonResponse
 import json
 
 def index(request):
@@ -14,7 +12,7 @@ def index(request):
                         .annotate(
                             like_count_anno=Count('likes', distinct=True),      # いいね数を集計
                             comment_count_anno=Count('comments', distinct=True), # コメント数を集計
-                            quote_count_anno=Count('quoted_by', distinct=True)    # 引用数(リポスト数)を集計
+                            quote_count_anno=Count('quoted_post__quoted_by', distinct=True) # 引用数(リポスト数)を集計
                         ) \
                         .order_by("-post_id")
                         
@@ -44,7 +42,6 @@ def index(request):
         form = PostForm()
 
     # [3] 各投稿のいいね判定と、集計結果の割り当て
-    # ループ内で count() を呼び出す代わりに、アノテーション結果を使用する
     for post in posts:
         # 個人のいいね判定 (個別のクエリが必要)
         if request.user.is_authenticated:
@@ -53,7 +50,6 @@ def index(request):
             post.is_liked = False
             
         # アノテーションの結果をテンプレート変数に割り当てる
-        # これにより、テンプレート側で post.like_count などとしてアクセス可能になる
         post.like_count = post.like_count_anno
         post.comment_count = post.comment_count_anno
         post.quote_count = post.quote_count_anno
@@ -64,8 +60,6 @@ def index(request):
         "current_user": request.user,
     }
     return render(request, "posts/index.html", context)
-
-
 
 @login_required
 def toggle_like(request):
@@ -83,21 +77,29 @@ def toggle_like(request):
         })
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+@login_required
 def add_comment(request, post_id):
-    if request.method == "POST" and request.user.is_authenticated:
-        post = get_object_or_404(Post, post_id=post_id)
-        text = request.POST.get("text", "").strip()
-        if text:
-            comment = Comment.objects.create(post=post, user=request.user, text=text)
-            return JsonResponse({
-                "comment_id": comment.comment_id,
-                "username": comment.user.username,
-                "display_name": comment.user.display_name,
-                "icon_url": comment.user.icon.url if comment.user.icon else "",
-                "text": comment.text,
-                "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S")
-            })
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    if request.method == 'POST':
+        original_post = get_object_or_404(Post, post_id=post_id)
+        
+        # フォームまたはリクエストデータから内容を取得
+        content = request.POST.get('text')
+        
+        if content:
+            # ★ 3. Postモデルとしてコメントを作成 ★
+            Post.objects.create(
+                author=request.user,
+                content=content,
+                commented_post=original_post  # 元のポストIDを紐付ける
+            )
+            
+            # コメント投稿に成功したら、元のポストの詳細ページへリダイレクトするのが一般的です
+            # ただし、ここでは JSON を返すことが期待されているかもしれないため、成功レスポンスを返します
+            return JsonResponse({"ok": True, "message": "Comment added successfully"})
+    
+    # ユーザーが認証済みではない場合 (login_requiredが適用されているため不要だが、保険として)
+    # またはGETリクエストの場合は、エラーではなくリダイレクトなどが適切だが、元のコードに合わせて400を返す
+    return JsonResponse({"error": "Invalid request or content missing"}, status=400)
 
 @login_required
 def quote_post(request):
@@ -133,60 +135,23 @@ def delete_post(request, post_id):
     post.delete()
     return JsonResponse({"ok": True})
 
-from django.shortcuts import render, get_object_or_404
-from django.http import Http404
-# from .models import Post (Postモデルがインポートされている必要があります)
-
-def post_detail(request, post_id): # post_id は str 型として渡される
-
-    # 1. 文字列を BigInt として扱うために整数に変換
-    try:
-        post_id_int = int(post_id) 
-    except ValueError:
-        # IDが数字ではない（例: "abc"）場合は404
-        raise Http404("Invalid post ID format.")
-
-    # 2. データベース検索 (変換した整数値を使用)
-    # 検索キーは必ず 'pk=post_id_int' と、変換後の整数を使用する
-    post = get_object_or_404(
-        Post.objects.select_related('author', 'quoted_post', 'quoted_post__author')
-                    .prefetch_related('comments', 'comments__user'), 
-        post_id=post_id  # ★ ここを post_id= に変更する！
-    )
-    
-    # その投稿に紐づくコメントも取得
-    comments = post.comments.all().order_by('created_at')
-
-    # 詳細表示用のテンプレートにデータを渡す
-    context = {
-        'post': post,
-        'comments': comments,
-        'current_user': request.user,
-    }
-    
-    # 3. テンプレートのレンダリング
-    return render(request, 'posts/detail.html', context)
-
 def post_detail(request, post_id): 
-    try:
-        # URLから受け取った文字列を整数に変換
-        post_id_int = int(post_id) 
-    except ValueError:
-        raise Http404("Invalid post ID format.")
+    # 4. 関数が重複定義されていたため、統合されたロジックを使用
 
     # データベース検索と集計 (annotate) を同時に実行
     post = get_object_or_404(
         Post.objects.select_related('author', 'quoted_post', 'quoted_post__author')
-                    .prefetch_related('comments', 'comments__user')
+                    # コメントは Post モデルのインスタンスとして related_name='comments' で取得
+                    .prefetch_related('comments', 'comments__author') 
                     .annotate(
                         like_count_anno=Count('likes', distinct=True),
                         comment_count_anno=Count('comments', distinct=True),
-                        quote_count_anno=Count('quoted_by', distinct=True) # 引用（リポスト）数をカウント
+                        quote_count_anno=Count('quoted_post__quoted_by', distinct=True) # 引用数をカウント
                     ), 
         post_id=post_id # post_id (CharField) で検索
     )
     
-    # テンプレートでアクセスしやすいように、集計結果を属性として割り当てる (オプション)
+    # テンプレートでアクセスしやすいように、集計結果を属性として割り当てる
     post.like_count = post.like_count_anno
     post.comment_count = post.comment_count_anno
     post.quote_count = post.quote_count_anno
@@ -197,7 +162,8 @@ def post_detail(request, post_id):
     else:
         post.is_liked = False
     
-    comments = post.comments.all().order_by('created_at')
+    # 4. コメントの取得：Post モデルのインスタンスとして取得する
+    comments = post.comments.all().select_related('author').order_by('created_at')
 
     context = {
         'post': post,
