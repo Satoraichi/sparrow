@@ -117,7 +117,7 @@
         <div class="post-footer">
             <div class="buttons">
                 <button class="comment-btn" onclick="location.href='{% url 'posts:detail' post.post_id %}'" style="text-decoration: none;">
-                    <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="like-count">{{ post.comment_count }}</span>
+                    <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ post.comment_count }}</span>
                 </button>
                 <form method="POST" style="display:inline;">
                     {% csrf_token %}
@@ -141,7 +141,7 @@
             <div class="comment-form">
                 <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
                 <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
-                <button type="button" class="comment-btn" data-post-id="{{ post.post_id }}">送信</button>
+                <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
             </div>
             {% endif %}
 
@@ -313,36 +313,51 @@ document.addEventListener("DOMContentLoaded", () => {
         4) コメント投稿 (Postモデル対応版)
     ========================================================== */
 
-    document.querySelectorAll(".comment-btn").forEach(button => {
+    document.querySelectorAll(".send-comment-btn").forEach(button => {
         button.addEventListener("click", () => {
             const postId = button.dataset.postId;
             const textarea = document.querySelector(`.autoresize_new[data-post-id="${postId}"]`);
-            const text = textarea.value.trim(); // フォームから本文を取得
+            const text = textarea.value.trim();
             const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-            if (!text) return;
+            if (!text) {
+                // コメントが空の場合は処理を終了
+                return;
+            }
 
             const formData = new FormData();
-            formData.append("text", text); // サーバーは 'text' として受け取る
+            formData.append("text", text);
 
             fetch(`/add_comment/${postId}/`, {
                 method: "POST",
                 headers: { "X-CSRFToken": csrfToken },
                 body: formData
             })
-            .then(res => res.json())
+            .then(res => {
+                // HTTPステータスが正常かチェック
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
-                if (data.error) return;
+                if (data.error) {
+                    console.error("サーバーがエラーを返しました:", data.error);
+                    return;
+                }
 
                 // 成功レスポンスのチェック (data.ok)
                 if (data.ok) { 
                     const commentList = document.querySelector(`.comment-list[data-post-id="${postId}"]`);
+
+                    // コメント数表示要素の正確な取得
+                    const commentCountElement = document.querySelector(`.comment-count[data-post-id="${postId}"]`);
                     
                     // コメントを DOM に追加
                     const newComment = document.createElement("div");
                     newComment.classList.add("comment");
                     
-                    // ★★★ 修正点: data.content, data.display_name, data.username, data.icon_url を使用 ★★★
+                    // コメントHTMLを生成
                     newComment.innerHTML = `
                         <div class="icon_background">
                             ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
@@ -357,11 +372,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     `;
 
+                    // ★★★ newComment はここで定義・使用されているため、ReferenceErrorは発生しないはず ★★★
                     commentList.prepend(newComment);
                     textarea.value = ""; // テキストエリアをクリア
                     
-                    // 画面上のコメント数カウンターを更新するロジックが必要な場合、ここに追加
+                    // コメント数カウンターを更新
+                    if (commentCountElement && data.comment_count !== undefined) {
+                        commentCountElement.textContent = data.comment_count;
+                    }
                 }
+            })
+            .catch(error => {
+                console.error("コメント投稿中に致命的なエラーが発生しました:", error);
             });
         });
     });

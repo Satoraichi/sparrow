@@ -92,20 +92,23 @@ def add_comment(request, post_id):
             )
 
             original_author_username = original_post.author.username
+            new_comment_count = original_post.comments.count()
             
-            # ★★★ 修正点: 新しいコメントの情報をJSONで返す ★★★
+            # ★★★ 修正点: ユーザーアイコンURLの取得ロジックを安全に変更 ★★★
+            # ユーザーアイコンがある場合はそのURLを返し、ない場合は空の文字列を返す
+            icon_url = new_comment.author.icon.url if new_comment.author.icon else ""
+            
             return JsonResponse({
                 "ok": True,
                 "post_id": new_comment.post_id,
                 # ユーザー情報 (authorから取得)
                 "username": new_comment.author.username,
                 "display_name": new_comment.author.display_name,
-                "icon_url": new_comment.author.icon.url if new_comment.author.icon else None,
+                "icon_url": icon_url, # 修正した変数を使用
                 # コメント本文
                 "content": new_comment.content,
-                # 投稿時間 (JS側で timesince を処理しない場合はこちらで文字列化)
-                # "created_at": new_comment.created_at.strftime("%Y-%m-%d %H:%M:%S")
-                "original_author_username": original_author_username
+                "original_author_username": original_author_username,
+                "comment_count": new_comment_count
             })
     
     return JsonResponse({"error": "Invalid request or content missing"}, status=400)
