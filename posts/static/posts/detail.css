@@ -603,3 +603,21 @@ a.post-link{
     opacity: 0.75; 
     padding-bottom: 0;
 }
+
+.ancestor-footer{
+    border: none;
+}
+
+.hierarchy-connect{
+    position: absolute;
+    top: 5rem;
+    left: 1.475rem;
+    width: .2rem;
+    height: calc(100% - 5rem);
+    background-color:  #b6d6f4;
+    border-radius: .1rem;
+}
+
+.ancestor-footer .buttons span{
+    font-size: 1.2rem !important;
+}

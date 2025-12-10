@@ -49,6 +49,7 @@
     {% if ancestor_posts_path %}
         {% for ancestor in ancestor_posts_path %}
         <div class="unit ancestor-unit" data-post-id="{{ ancestor.post_id }}">
+            <div class="hierarchy-connect"></div>
             <div class="post" style="cursor: pointer;">
                 <div class="icon_background">
                     {% if ancestor.author.icon %}
@@ -84,17 +85,17 @@
                     <form method="POST" style="display:inline;">
                         {% csrf_token %}
                         {% if ancestor.is_liked %}
-                            <button type="button" class="liked like-btn" data-post-id="{{ ancestor.post_id }}" onclick="event.stopPropagation();">
+                            <button type="button" class="liked like-btn" data-post-id="{{ ancestor.post_id }}">
                                 <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
                             </button>
                         {% else %}
-                            <button type="button" class="unlike like-btn" data-post-id="{{ ancestor.post_id }}" onclick="event.stopPropagation();">
+                            <button type="button" class="unlike like-btn" data-post-id="{{ ancestor.post_id }}">
                                 <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
                             </button>
                         {% endif %}
                     </form>
                     
-                    <button class="quote-btn" data-post-id="{{ ancestor.post_id }}" onclick="event.stopPropagation();">
+                    <button class="quote-btn" data-post-id="{{ ancestor.post_id }}">
                         <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ ancestor.quote_count }}</span>
                     </button>
                 </div>
@@ -183,7 +184,7 @@
                 <form method="POST" style="display:inline;">
                     {% csrf_token %}
                     {% if post.is_liked %}
-                        <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
+                        <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}" >
                             <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
                         </button>
                     {% else %}
@@ -192,7 +193,7 @@
                         </button>
                     {% endif %}
                 </form>
-                <button class="quote-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
+                <button class="quote-btn" data-post-id="{{ post.post_id }}">
                     <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ post.quote_count }}</span>
                 </button>
             </div>
@@ -245,7 +246,7 @@
                     <form method="POST" style="display:inline;">
                         {% csrf_token %}
                         {% if comment.is_liked %}
-                            <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
+                            <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}">
                                 <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
                             </button>
                         {% else %}
@@ -255,7 +256,7 @@
                         {% endif %}
                     </form>
                     
-                    <button class="quote-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
+                    <button class="quote-btn" data-post-id="{{ comment.post_id }}">
                         <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ comment.quote_count }}</span>
                     </button>
                 </div>
@@ -271,33 +272,28 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
-        共通要素の取得 (グローバルに近い扱い)
+        共通要素の取得
     ========================================================== */
 
     const modal = document.getElementById("quoteModal");
     const quoteText = document.getElementById("quoteText");
     const quotePostId = document.getElementById("quotePostId");
     const quotedOriginal = document.getElementById("quotedOriginal");
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
     /* =========================================================
-        共通関数: 3) いいね機能
+        A) イベントハンドラ関数 (共通ロジック)
     ========================================================== */
-    function setupLikeButtons(scope = document) {
-        scope.querySelectorAll(".like-btn").forEach(button => {
-            // イベントを重複登録しないように、一度削除してから追加する (または once: true を使う)
-            // 今回はシンプルに、イベントリスナーの登録をこの関数内でのみ行う
-            button.removeEventListener('click', handleLikeToggle); // 既存のリスナーを削除 (安全のため)
-            button.addEventListener("click", handleLikeToggle);
-        });
-    }
 
-    function handleLikeToggle() {
-        // いいねボタンをクリックした場合、親要素へのイベント伝播を停止
-        event.stopPropagation();
+    /**
+     * いいね/いいね解除処理を実行する共通ハンドラ
+     */
+    function handleLikeToggle(event) {
+        event.preventDefault(); // 親フォームの送信を停止
+        event.stopPropagation(); // 親リンク/要素への伝播を停止
         
-        const postId = this.dataset.postId;
-        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
         const btn = this;
+        const postId = btn.dataset.postId;
 
         fetch("{% url 'posts:toggle_like' %}", {
             method: "POST",
@@ -319,65 +315,136 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* =========================================================
-        共通関数: 1) 引用モーダル機能
-    ========================================================== */
-    function setupQuoteButtons(scope = document) {
-        scope.querySelectorAll(".quote-btn").forEach(btn => {
-            btn.removeEventListener('click', handleQuoteClick); // 既存のリスナーを削除 (安全のため)
-            btn.addEventListener("click", handleQuoteClick);
-        });
-    }
-
+    /**
+     * 引用モーダルを開く処理を実行する共通ハンドラ
+     */
     function handleQuoteClick(event) {
+        event.preventDefault();
         event.stopPropagation();
-
-        const postId = this.dataset.postId;
+        
+        const btn = this;
+        const postId = btn.dataset.postId;
+        
         quotePostId.value = postId;
         quoteText.value = "";
-
-        // .unit または .comment-unit を検索
-        const unit = this.closest(".unit, .comment-unit"); 
-        // .post または .comment を検索
-        const originalPost = unit ? unit.querySelector(".post, .comment") : null;
         
+        const unit = btn.closest(".unit, .comment-unit"); 
+        const originalPost = unit ? unit.querySelector(".post, .comment") : null;
+
         if (originalPost) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = originalPost.innerHTML;
 
-            // 時間表示を削除
             const timeSpan = tempDiv.querySelector('.name span[style*="margin-left: auto;"]');
-            if (timeSpan) {
-                timeSpan.remove();
-            }
+            if (timeSpan) timeSpan.remove();
 
-            // 削除ボタンを削除 (投稿削除/コメント削除の両方に対応)
             const deleteBtns = tempDiv.querySelectorAll('.name .delete-btn, .name .delete-comment-btn');
             deleteBtns.forEach(dBtn => dBtn.remove());
 
-            // 4. クリーンアップされたHTMLをモーダルにセット
-            quotedOriginal.innerHTML = `
-                <div class="quoted-box">
-                    ${tempDiv.innerHTML}
-                </div>
-            `;
+            quotedOriginal.innerHTML = `<div class="quoted-box">${tempDiv.innerHTML}</div>`;
         } else {
             quotedOriginal.innerHTML = "<div class='quoted-box'>（引用元を取得できませんでした）</div>";
         }
-
         modal.classList.add('is-visible');
     }
-    
-    // モーダル閉じる
+
+    /**
+     * コメント削除処理を実行する共通ハンドラ
+     */
+    function handleDeleteComment() {
+        if (!confirm("このコメントを削除しますか？")) return;
+
+        const commentId = this.dataset.commentId;
+        const originalPostId = this.dataset.originalPostId;
+        const parentCommentUnit = this.closest(".comment-unit");
+
+        fetch(`/delete/${commentId}/`, { 
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                if (parentCommentUnit) parentCommentUnit.remove();
+                
+                if (data.new_comment_count !== undefined) {
+                    const mainPostCommentCountElement = document.querySelector(`.unit .post-footer .comment-count`); 
+                    if (mainPostCommentCountElement) {
+                        mainPostCommentCountElement.textContent = data.new_comment_count;
+                    }
+                }
+            } else {
+                console.error("コメント削除失敗:", data.error);
+            }
+        });
+    }
+
+
+    /* =========================================================
+        B) イベントリスナー登録関数 (共通化)
+    ========================================================== */
+
+    /**
+     * 指定されたスコープ内のいいねボタンにリスナーを登録
+     */
+    function setupLikeButtons(scope = document) {
+        scope.querySelectorAll(".like-btn").forEach(button => {
+            button.removeEventListener('click', handleLikeToggle);
+            button.addEventListener("click", handleLikeToggle);
+        });
+    }
+
+    /**
+     * 指定されたスコープ内の引用ボタンにリスナーを登録
+     */
+    function setupQuoteButtons(scope = document) {
+        scope.querySelectorAll(".quote-btn").forEach(btn => {
+            btn.removeEventListener('click', handleQuoteClick);
+            btn.addEventListener("click", handleQuoteClick);
+        });
+    }
+
+    /**
+     * 指定されたスコープ内のコメント削除ボタンにリスナーを登録
+     */
+    function setupDeleteCommentButtons(scope = document) {
+        scope.querySelectorAll(".delete-comment-btn").forEach(btn => {
+            btn.removeEventListener('click', handleDeleteComment);
+            btn.addEventListener("click", handleDeleteComment);
+        });
+    }
+
+    /**
+     * 動的に追加された要素に全てのリスナーを登録する統合関数
+     */
+    function attachEventListeners(newElement) {
+        setupLikeButtons(newElement);
+        setupQuoteButtons(newElement);
+        setupDeleteCommentButtons(newElement);
+    }
+
+
+    /* =========================================================
+        1. 初期ロード時のイベント登録
+    ========================================================== */
+    setupLikeButtons();
+    setupQuoteButtons();
+    setupDeleteCommentButtons(); // 既存のコメント削除ボタンにも適用
+
+    /* =========================================================
+        2. 引用モーダル処理 (1)
+    ========================================================== */
+
     document.getElementById("closeModal").addEventListener("click", () => {
         modal.classList.remove('is-visible');
     });
 
-    // 引用送信
     document.getElementById("sendQuote").addEventListener("click", () => {
         const text = quoteText.value.trim();
         const quotedId = quotePostId.value;
-        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
         fetch("/posts/quote/", {
             method: "POST",
@@ -398,79 +465,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-    
-    /* =========================================================
-        共通関数: 5) コメント削除機能
-    ========================================================== */
-    function setupDeleteCommentButtons(scope = document) {
-        scope.querySelectorAll(".delete-comment-btn").forEach(btn => {
-            btn.removeEventListener('click', handleDeleteComment);
-            btn.addEventListener("click", handleDeleteComment);
-        });
-    }
-
-    function handleDeleteComment() {
-        if (!confirm("このコメントを削除しますか？")) {
-            return;
-        }
-
-        const commentId = this.dataset.commentId;
-        const originalPostId = this.dataset.originalPostId; // コメント数更新用
-        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-        const parentCommentUnit = this.closest(".comment-unit"); // 削除対象のコメント要素
-
-        fetch(`/delete/${commentId}/`, { 
-            method: "POST",
-            headers: {
-                "X-CSRFToken": csrfToken,
-                "Content-Type": "application/json"
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.ok) {
-                if (parentCommentUnit) {
-                    parentCommentUnit.remove();
-                }
-                
-                if (data.new_comment_count !== undefined) {
-                    // メイン投稿のコメント数カウンタを更新
-                    const commentCountElement = document.querySelector(`.unit .post-footer .comment-count`); 
-                    if (commentCountElement) {
-                        commentCountElement.textContent = data.new_comment_count;
-                    }
-                }
-            } else {
-                console.error("コメント削除失敗:", data.error);
-            }
-        })
-        .catch(error => {
-            console.error("ネットワークエラー:", error);
-        });
-    }
 
 
     /* =========================================================
-        4) コメント投稿 (DOM操作 + イベントリスナー再適用)
+        3. コメント投稿処理 (4)
     ========================================================== */
-
-    // 新しい要素にイベントリスナーをアタッチする統合関数
-    function attachCommentEventListeners(newCommentElement) {
-        setupLikeButtons(newCommentElement);
-        setupQuoteButtons(newCommentElement);
-        setupDeleteCommentButtons(newCommentElement);
-    }
 
     document.querySelectorAll(".send-comment-btn").forEach(button => {
         button.addEventListener("click", () => {
             const postId = button.dataset.postId;
             const textarea = document.querySelector(`.autoresize_new[data-post-id="${postId}"]`);
             const text = textarea.value.trim();
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-            if (!text) {
-                return;
-            }
+            if (!text) return;
 
             const formData = new FormData();
             formData.append("text", text);
@@ -480,18 +487,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "X-CSRFToken": csrfToken },
                 body: formData
             })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                if (data.error) {
-                    console.error("サーバーがエラーを返しました:", data.error);
-                    return;
-                }
-
                 if (data.ok) { 
                     const commentList = document.querySelector(`.comment-list[data-post-id="${postId}"]`);
                     const mainPostCommentCountElement = document.querySelector(`.unit .post-footer .comment-count`); 
@@ -548,8 +545,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         mainPostCommentCountElement.textContent = data.comment_count;
                     }
                     
-                    // 新しく追加した要素にイベントリスナーをアタッチ
-                    attachCommentEventListeners(newCommentUnit);
+                    // 新しく追加した要素に全てのリスナーをアタッチ
+                    attachEventListeners(newCommentUnit);
                 }
             })
             .catch(error => {
@@ -558,8 +555,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+
     /* =========================================================
-        5) 投稿削除
+        4. 投稿削除処理 (5)
     ========================================================== */
 
     document.querySelectorAll(".delete-btn").forEach(btn => {
@@ -567,7 +565,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!confirm("このポストを削除しますか？")) return;
 
             const postId = btn.dataset.postId;
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
             fetch(`/delete/${postId}/`, {
                 method: "POST",
@@ -581,17 +578,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.ok) {
                     const unit = btn.closest(".unit");
                     if (unit) unit.remove();
-                    // 削除後、ホームなどへリダイレクトするのが一般的だが、ここではそのまま。
                 }
             });
         });
     });
 
+
     /* =========================================================
-        2) 自動リサイズ (変更なし)
+        5. 自動リサイズ (2)
     ========================================================== */
 
     document.querySelectorAll('.autoresize, .autoresize_new').forEach(textarea => {
+        // 初期リサイズ
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
 
@@ -601,8 +599,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+
     /* =========================================================
-        6) ログアウト警告 (変更なし)
+        6. ログアウト警告 (6)
     ========================================================== */
 
     document.querySelector(".logout-form").addEventListener("submit", function(event) {
@@ -611,8 +610,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    
     /* =========================================================
-        画像プレビュー機能 (変更なし)
+        7. 画像プレビュー機能
     ========================================================== */
     const imageInput = document.getElementById('id_image'); 
     const imageIcon = document.getElementById('image-upload-icon'); 
@@ -652,13 +652,10 @@ document.addEventListener("DOMContentLoaded", () => {
             imageInput.value = ''; 
             imageInput.dispatchEvent(new Event('change')); 
         });
-
-    } else {
-        console.error("画像プレビューの初期化に失敗しました。HTML要素のIDを確認してください。");
     }
 
     /* =========================================================
-        7) 画像モーダル処理 (変更なし)
+        8. 画像モーダル処理 (7)
     ========================================================== */
     const imageModal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
@@ -682,13 +679,6 @@ document.addEventListener("DOMContentLoaded", () => {
             imageModal.style.display = 'none';
         }
     });
-
-    /* =========================================================
-        初期ロード時のイベントリスナー設定
-    ========================================================== */
-    setupLikeButtons(); // 既存のいいねボタンにリスナーを設定
-    setupQuoteButtons(); // 既存の引用ボタンにリスナーを設定
-    setupDeleteCommentButtons(); // 既存のコメント削除ボタンにリスナーを設定
 });
 </script>
 
