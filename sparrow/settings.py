@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-k30irhcktxj3&dfjn9@%*z_f%g_in^$rr@23pc1u9!&dzec5qi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0',"localhost",'*','.vercel.app']
+ALLOWED_HOSTS = ['0.0.0.0',"localhost",'*','.vercel.app','satoraichi.synology.me']
 
 
 # Application definition
@@ -150,4 +150,4 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 # 起動するIPアドレスとポートを指定
 RUNSERVERPLUS_SERVER_ADDRESS_PORT = '0.0.0.0:8000'
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
