@@ -178,7 +178,7 @@
                 <div class="post-footer">
                     <div class="buttons">
                         <button class="comment-btn" data-post-id="{{ comment.post_id }}" style="text-decoration: none;">
-                            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
+                            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.2rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
                         </button>
                         
                         <form method="POST" style="display:inline;">
@@ -421,8 +421,37 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     });
-
+    
     /* =========================================================
+        5) 投稿削除
+    ========================================================== */
+
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (!confirm("このポストを削除しますか？")) return;
+
+            const postId = btn.dataset.postId;
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+            fetch(`/delete/${postId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    // 削除対象の投稿を画面から消す
+                    const unit = btn.closest(".unit");
+                    if (unit) unit.remove();
+                }
+            });
+        });
+    });
+
+        /* =========================================================
         5) コメント削除
     ========================================================== */
 
@@ -470,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* =========================================================
-        7) ログアウト警告
+        6) ログアウト警告
     ========================================================== */
 
     document.querySelector(".logout-form").addEventListener("submit", function(event) {
@@ -574,7 +603,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-
-
 
 {% endblock %}

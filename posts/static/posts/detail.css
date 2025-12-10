@@ -347,6 +347,7 @@ img.icon{
     width: calc(100% - 10rem);
     display:flex; 
     justify-content: space-around;
+
 }
 
 .post-footer .buttons span{
@@ -367,12 +368,17 @@ button.comment-btn{
 }
 
 button.comment-btn span{
-    display: inline-block;
+    display: inline;
     transition: color 0.5s ease; 
     font-size: 1.5rem;
     margin-left: .5rem;
     color: #fff;
     transition: color 0.5s ease; 
+}
+
+.comment-unit button.comment-btn span{
+    display: inline;
+    font-size: 1.2rem !important;
 }
 
 button.comment-btn:hover span{
@@ -418,10 +424,16 @@ button.liked span.material-symbols-rounded {
 
 button.liked span,
 button.unlike span {
-    display: inline-block; /* transformを効かせる場合と同様 */
+    display: inline; /* transformを効かせる場合と同様 */
     transition: color 0.5s ease; /* 色の変化をスムーズに */
     font-size: 1.5rem;
     margin-left: .5rem;
+}
+
+.comment-unit .liked span,
+.comment-unit button.unlike span {
+    display: inline;
+    font-size: 1.2rem !important;
 }
 
 button.quote-btn{
@@ -430,11 +442,16 @@ button.quote-btn{
 }
 
 button.quote-btn span{
-    display: inline-block;
+    display: inline;
     transition: color 0.5s ease; 
     font-size: 1.5rem;
     margin-left: .5rem;
     color: #fff;
+}
+
+.comment-unit .quote-btn span{
+    display: inline;
+    font-size: 1.2rem !important;
 }
 
 button.quote-btn:hover span{
