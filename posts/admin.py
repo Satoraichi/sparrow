@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from django.contrib import admin
-from .models import Post, Comment, Like, Bookmark, Repost
+from .models import Post, Like, Bookmark, Repost
 
 # Post 管理画面
 @admin.register(Post)
@@ -13,12 +13,6 @@ class PostAdmin(admin.ModelAdmin):
     def content_summary(self, obj):
         return obj.content[:50]
     content_summary.short_description = 'Content'
-
-# コメント・いいね・ブックマーク・リポストも登録（閲覧用）
-@admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'post', 'user', 'created_at')
-    search_fields = ('post__content', 'user__username')
 
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):
