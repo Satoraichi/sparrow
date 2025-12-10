@@ -1,6 +1,7 @@
 # posts/forms.py
 from django import forms
 from .models import Post
+from .models import Comment
 
 class PostForm(forms.ModelForm):
     content = forms.CharField(
@@ -31,3 +32,7 @@ class CommentForm(forms.ModelForm):
         ),
         label=''
     )
+
+    class Meta:
+        model = Comment
+        fields = ['text']
