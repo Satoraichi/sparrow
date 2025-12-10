@@ -104,6 +104,7 @@
                         {% endif %}
                     </div>
                 </div>
+                <a href="{% url 'posts:detail' post.quoted_post.post_id %}" class="post-link"></a>
             </div>
         </div>
         {% elif post.repost and not post.quoted_post %}
