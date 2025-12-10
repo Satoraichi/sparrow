@@ -1,1 +1,1 @@
-web: gunicorn sparrow.wsgi:application
+web: gunicorn sparrow.wsgi:application --bind 0.0.0.0:$PORT
