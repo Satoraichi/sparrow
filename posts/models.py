@@ -32,14 +32,6 @@ class Post(models.Model):
         related_name="quoted_by"
     )
 
-    commented_post = models.ForeignKey(
-        'self', 
-        on_delete=models.CASCADE,  # 元ポストが削除されたらコメントも削除
-        related_name='comments',  # 元ポストからコメントを取得するためのリレーション名
-        null=True, 
-        blank=True
-    )
-
     def save(self, *args, **kwargs):
         if not self.post_id:
             # 13桁 → 12桁にトリム
@@ -50,6 +42,20 @@ class Post(models.Model):
         ordering = ["-post_id"]  # post_id 降順（新しい投稿が上）
 
     repost = models.BooleanField(default=False)
+
+class Comment(models.Model):
+    comment_id = models.CharField(max_length=12, unique=True, editable=False)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.comment_id:
+            # 12桁のランダムなIDを生成
+            self.comment_id = str(uuid.uuid4().int)[:12]
+        super().save(*args, **kwargs)
+
 
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
