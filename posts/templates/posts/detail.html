@@ -1,7 +1,7 @@
 {% extends "posts/base.html" %}
 {% load static %}
 
-{% block title %}"{{ post.content|linebreaksbr}}" by {{ current_user.display_name }} | Sparrow{% endblock %}
+{% block title %}"{{ post.content|linebreaksbr}}" by {{ post.author.display_name }} | Sparrow{% endblock %}
 
 {% block extra_style %}
 <link rel="preload" href="{% static 'posts/detail.css' %}" as="style">
@@ -46,10 +46,71 @@
 <div class="posts-wrapper">
     <h2 style="color: #fff; margin-bottom: 1rem;">ポスト詳細</h2>
 
+    {% if ancestor_posts_path %}
+        {% for ancestor in ancestor_posts_path %}
+        <div class="unit ancestor-unit" data-post-id="{{ ancestor.post_id }}">
+            <div class="post" style="cursor: pointer;">
+                <div class="icon_background">
+                    {% if ancestor.author.icon %}
+                        <img src="{{ ancestor.author.icon.url }}" class="icon">
+                    {% endif %}
+                </div>
+                
+                <div class="post-content">
+                    <div class="name">
+                        <label>{{ ancestor.author.display_name }}</label> @{{ ancestor.author.username }}
+                        <span style="margin-left: auto; font-size: 0.8rem; color: #8d8d8d;">
+                            {{ ancestor.created_at|timesince }}前
+                        </span>
+                    </div>
+                    
+                    <div class="post-body">
+                        {{ ancestor.content|linebreaksbr|truncatechars:100 }}
+                        {% if ancestor.image %}
+                            <div class="post-image">
+                                <img src="{{ ancestor.image.url }}" class="post-image-thumbnail" alt="投稿画像">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="post-footer ancestor-footer">
+                <div class="buttons">
+                    <button class="comment-btn" onclick="location.href='{% url 'posts:detail' ancestor.post_id %}'" style="text-decoration: none;">
+                        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ ancestor.comment_count }}</span>
+                    </button>
+                    
+                    <form method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        {% if ancestor.is_liked %}
+                            <button type="button" class="liked like-btn" data-post-id="{{ ancestor.post_id }}" onclick="event.stopPropagation();">
+                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
+                            </button>
+                        {% else %}
+                            <button type="button" class="unlike like-btn" data-post-id="{{ ancestor.post_id }}" onclick="event.stopPropagation();">
+                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
+                            </button>
+                        {% endif %}
+                    </form>
+                    
+                    <button class="quote-btn" data-post-id="{{ ancestor.post_id }}" onclick="event.stopPropagation();">
+                        <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ ancestor.quote_count }}</span>
+                    </button>
+                </div>
+                <span>ポストID:{{ ancestor.post_id }}</span>
+            </div>
+            <a href='{% url 'posts:detail' ancestor.post_id %}' class="post-link"></a>
+        </div>
+
+        {% endfor %}
+    {% endif %}
     <div class="unit"> 
         <div class="post">
             <div class="icon_background">
+                {% if post.author.icon %}
                 <img src="{{ post.author.icon.url }}" class="icon">
+                {% endif %}
             </div>
             
             <div class="post-content">
@@ -138,71 +199,71 @@
             <span>ポストID:{{ post.post_id }}</span>
         </div>
     </div>
-        {% if current_user.is_authenticated %}
-        <div class="comment-form">
-            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
-            <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
-            <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
-        </div>
-        {% endif %}
+    
+    {% if current_user.is_authenticated %}
+    <div class="comment-form">
+        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
+        <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
+        <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
+    </div>
+    {% endif %}
 
-        <div class="comment-list" data-post-id="{{ post.post_id }}">
-            {% for comment in comments %}
-            <div class="comment-unit">
-                <div class="comment">
-                    <div class="icon_background">
-                        {% if comment.author.icon %}
-                        <img src="{{ comment.author.icon.url }}" class="icon">
+    <div class="comment-list" data-post-id="{{ post.post_id }}">
+        {% for comment in comments %}
+        <div class="comment-unit">
+            <div class="comment">
+                <div class="icon_background">
+                    {% if comment.author.icon %}
+                    <img src="{{ comment.author.icon.url }}" class="icon">
+                    {% endif %}
+                </div>
+                <div class="post-content">
+                    <div class="name">
+                        <label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span>
+                        {% if current_user.post_id == comment.author.id %}
+                        <button class="delete-comment-btn" data-comment-id="{{ comment.post_id }}" data-original-post-id="{{ post.post_id }}">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
                         {% endif %}
                     </div>
-                    <div class="post-content">
-                        <div class="name">
-                            <label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span>
-                            {% if current_user == comment.author %}
-                            <button class="delete-comment-btn" data-comment-id="{{ comment.post_id }}" data-original-post-id="{{ post.post_id }}">
-                                <span class="material-symbols-rounded">delete</span>
-                            </button>
-                            {% endif %}
-                        </div>
-                        <p class="reply-base"> 返信先： @{{ post.author.username }}</p>
-                        <div class="post-body">
-                            {{ comment.content|linebreaksbr}}
-                                {% if comment.image %}
-                                <div class="post-image">
-                                    <img src="{{ comment.image.url }}" class="post-image-thumbnail" alt="投稿画像">
-                                </div>
-                            {% endif %}
-                        </div>
+                    <div class="post-body">
+                        {{ comment.content|linebreaksbr}}
+                            {% if comment.image %}
+                            <div class="post-image">
+                                <img src="{{ comment.image.url }}" class="post-image-thumbnail" alt="投稿画像">
+                            </div>
+                        {% endif %}
                     </div>
-                </div>
-                <div class="post-footer">
-                    <div class="buttons">
-                        <button class="comment-btn" data-post-id="{{ comment.post_id }}" style="text-decoration: none;">
-                            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.2rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
-                        </button>
-                        
-                        <form method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            {% if comment.is_liked %}
-                                <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
-                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
-                                </button>
-                            {% else %}
-                                <button type="button" class="unlike like-btn" data-post-id="{{ comment.post_id }}">
-                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
-                                </button>
-                            {% endif %}
-                        </form>
-                        
-                        <button class="quote-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
-                            <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ comment.quote_count }}</span>
-                        </button>
-                    </div>
-                    <span>コメントID:{{ comment.post_id }}</span>
                 </div>
             </div>
-            {% endfor %}
+            <div class="post-footer">
+                <div class="buttons">
+                    <button class="comment-btn" data-post-id="{{ comment.post_id }}" style="text-decoration: none;">
+                        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.2rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
+                    </button>
+                    
+                    <form method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        {% if comment.is_liked %}
+                            <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
+                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                            </button>
+                        {% else %}
+                            <button type="button" class="unlike like-btn" data-post-id="{{ comment.post_id }}">
+                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                            </button>
+                        {% endif %}
+                    </form>
+                    
+                    <button class="quote-btn" data-post-id="{{ comment.post_id }}" onclick="event.stopPropagation();">
+                        <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ comment.quote_count }}</span>
+                    </button>
+                </div>
+                <span>コメントID:{{ comment.post_id }}</span>
+            </div>
+            <a href="{% url 'posts:detail' comment.post_id %}" class="post-link"></a>
         </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -210,7 +271,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
-        1) 引用モーダル処理（元ポスト表示つき）
+        共通要素の取得 (グローバルに近い扱い)
     ========================================================== */
 
     const modal = document.getElementById("quoteModal");
@@ -218,54 +279,97 @@ document.addEventListener("DOMContentLoaded", () => {
     const quotePostId = document.getElementById("quotePostId");
     const quotedOriginal = document.getElementById("quotedOriginal");
 
-    document.querySelectorAll(".quote-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            event.stopPropagation();
+    /* =========================================================
+        共通関数: 3) いいね機能
+    ========================================================== */
+    function setupLikeButtons(scope = document) {
+        scope.querySelectorAll(".like-btn").forEach(button => {
+            // イベントを重複登録しないように、一度削除してから追加する (または once: true を使う)
+            // 今回はシンプルに、イベントリスナーの登録をこの関数内でのみ行う
+            button.removeEventListener('click', handleLikeToggle); // 既存のリスナーを削除 (安全のため)
+            button.addEventListener("click", handleLikeToggle);
+        });
+    }
 
-            const postId = btn.dataset.postId;
-            quotePostId.value = postId;
-            quoteText.value = "";
+    function handleLikeToggle() {
+        // いいねボタンをクリックした場合、親要素へのイベント伝播を停止
+        event.stopPropagation();
+        
+        const postId = this.dataset.postId;
+        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+        const btn = this;
 
-            const unit = btn.closest(".unit");
-            const originalPost = unit.querySelector(".post");
-            
-            if (originalPost) {
-                // 1. originalPost のHTMLコンテンツを一旦コンテナにロード
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = originalPost.innerHTML;
+        fetch("{% url 'posts:toggle_like' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `post_id=${postId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.error) {
+                btn.classList.toggle("liked", data.is_liked);
+                btn.classList.toggle("unlike", !data.is_liked);
 
-                // 2. ★ 投稿者の名前行 (.name) の中の時間表示要素を検索して削除
-                // 時間表示は通常、.name divの末尾にある <span> 要素
-                const timeSpan = tempDiv.querySelector('.name span[style*="margin-left: auto;"]');
-                if (timeSpan) {
-                    timeSpan.remove();
-                }
+                const count = btn.querySelector(".like-count");
+                count.textContent = data.like_count;
+            }
+        });
+    }
 
-                // 3. 削除ボタンがあればそれも削除（引用元には不要なため）
-                const deleteBtn = tempDiv.querySelector('.name .delete-btn');
-                if (deleteBtn) {
-                    deleteBtn.remove();
-                }
+    /* =========================================================
+        共通関数: 1) 引用モーダル機能
+    ========================================================== */
+    function setupQuoteButtons(scope = document) {
+        scope.querySelectorAll(".quote-btn").forEach(btn => {
+            btn.removeEventListener('click', handleQuoteClick); // 既存のリスナーを削除 (安全のため)
+            btn.addEventListener("click", handleQuoteClick);
+        });
+    }
 
-                // 4. クリーンアップされたHTMLをモーダルにセット
-                quotedOriginal.innerHTML = `
-                    <div class="quoted-box">
-                        ${tempDiv.innerHTML}
-                    </div>
-                `;
-            } else {
-                quotedOriginal.innerHTML = "<div class='quoted-box'>（引用元を取得できませんでした）</div>";
+    function handleQuoteClick(event) {
+        event.stopPropagation();
+
+        const postId = this.dataset.postId;
+        quotePostId.value = postId;
+        quoteText.value = "";
+
+        // .unit または .comment-unit を検索
+        const unit = this.closest(".unit, .comment-unit"); 
+        // .post または .comment を検索
+        const originalPost = unit ? unit.querySelector(".post, .comment") : null;
+        
+        if (originalPost) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = originalPost.innerHTML;
+
+            // 時間表示を削除
+            const timeSpan = tempDiv.querySelector('.name span[style*="margin-left: auto;"]');
+            if (timeSpan) {
+                timeSpan.remove();
             }
 
-            // CSS Transitionを適用するため、クラスを追加する
-            modal.classList.add('is-visible');
-        });
-    });
+            // 削除ボタンを削除 (投稿削除/コメント削除の両方に対応)
+            const deleteBtns = tempDiv.querySelectorAll('.name .delete-btn, .name .delete-comment-btn');
+            deleteBtns.forEach(dBtn => dBtn.remove());
 
+            // 4. クリーンアップされたHTMLをモーダルにセット
+            quotedOriginal.innerHTML = `
+                <div class="quoted-box">
+                    ${tempDiv.innerHTML}
+                </div>
+            `;
+        } else {
+            quotedOriginal.innerHTML = "<div class='quoted-box'>（引用元を取得できませんでした）</div>";
+        }
+
+        modal.classList.add('is-visible');
+    }
+    
     // モーダル閉じる
     document.getElementById("closeModal").addEventListener("click", () => {
-        // ★ 修正: CSS Transitionを適用するため、クラスを削除する
-        // modal.style.display = "none"; <-- 削除
         modal.classList.remove('is-visible');
     });
 
@@ -289,63 +393,73 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(res => res.json())
         .then(data => {
             if (data.ok) {
-                // ★ 修正: CSS Transitionを適用するため、クラスを削除する
-                // modal.style.display = "none"; <-- 削除
                 modal.classList.remove('is-visible');
                 location.reload();
             }
         });
     });
-
+    
     /* =========================================================
-        2) 自動リサイズ
+        共通関数: 5) コメント削除機能
     ========================================================== */
-
-    document.querySelectorAll('.autoresize, .autoresize_new').forEach(textarea => {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
+    function setupDeleteCommentButtons(scope = document) {
+        scope.querySelectorAll(".delete-comment-btn").forEach(btn => {
+            btn.removeEventListener('click', handleDeleteComment);
+            btn.addEventListener("click", handleDeleteComment);
         });
-    });
+    }
 
-    /* =========================================================
-        3) いいね
-    ========================================================== */
+    function handleDeleteComment() {
+        if (!confirm("このコメントを削除しますか？")) {
+            return;
+        }
 
-    document.querySelectorAll(".like-btn").forEach(button => {
-        button.addEventListener("click", function() {
+        const commentId = this.dataset.commentId;
+        const originalPostId = this.dataset.originalPostId; // コメント数更新用
+        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+        const parentCommentUnit = this.closest(".comment-unit"); // 削除対象のコメント要素
 
-            const postId = this.dataset.postId;
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-            const btn = this;
-
-            fetch("{% url 'posts:toggle_like' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `post_id=${postId}`
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.error) {
-                    btn.classList.toggle("liked", data.is_liked);
-                    btn.classList.toggle("unlike", !data.is_liked);
-
-                    const count = btn.querySelector(".like-count");
-                    count.textContent = data.like_count;
+        fetch(`/delete/${commentId}/`, { 
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                if (parentCommentUnit) {
+                    parentCommentUnit.remove();
                 }
-            });
+                
+                if (data.new_comment_count !== undefined) {
+                    // メイン投稿のコメント数カウンタを更新
+                    const commentCountElement = document.querySelector(`.unit .post-footer .comment-count`); 
+                    if (commentCountElement) {
+                        commentCountElement.textContent = data.new_comment_count;
+                    }
+                }
+            } else {
+                console.error("コメント削除失敗:", data.error);
+            }
+        })
+        .catch(error => {
+            console.error("ネットワークエラー:", error);
         });
-    });
+    }
+
 
     /* =========================================================
-        4) コメント投稿 (Postモデル対応版)
+        4) コメント投稿 (DOM操作 + イベントリスナー再適用)
     ========================================================== */
+
+    // 新しい要素にイベントリスナーをアタッチする統合関数
+    function attachCommentEventListeners(newCommentElement) {
+        setupLikeButtons(newCommentElement);
+        setupQuoteButtons(newCommentElement);
+        setupDeleteCommentButtons(newCommentElement);
+    }
 
     document.querySelectorAll(".send-comment-btn").forEach(button => {
         button.addEventListener("click", () => {
@@ -355,7 +469,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
             if (!text) {
-                // コメントが空の場合は処理を終了
                 return;
             }
 
@@ -368,7 +481,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: formData
             })
             .then(res => {
-                // HTTPステータスが正常かチェック
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }
@@ -380,40 +492,64 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // 成功レスポンスのチェック (data.ok)
                 if (data.ok) { 
                     const commentList = document.querySelector(`.comment-list[data-post-id="${postId}"]`);
-
-                    // コメント数表示要素の正確な取得
-                    const commentCountElement = document.querySelector(`.comment-count[data-post-id="${postId}"]`);
+                    const mainPostCommentCountElement = document.querySelector(`.unit .post-footer .comment-count`); 
                     
-                    // コメントを DOM に追加
-                    const newComment = document.createElement("div");
-                    newComment.classList.add("comment");
+                    const newCommentUnit = document.createElement("div");
+                    newCommentUnit.classList.add("comment-unit");
                     
-                    // コメントHTMLを生成
-                    newComment.innerHTML = `
-                        <div class="icon_background">
-                            ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : ""}
-                        </div>
-                        <div class="post-content">
-                            <div class="name">
-                                <label>${data.display_name}</label> @${data.username}
+                    // 新しいコメントのHTMLを生成
+                    newCommentUnit.innerHTML = `
+                        <div class="comment">
+                            <div class="icon_background">
+                                ${data.icon_url ? `<img src="${data.icon_url}" class="icon">` : "{% if current_user.icon %}<img src='{% static 'images/default_icon.png' %}' class='icon'>{% endif %}"}
+                            </div>
+                            <div class="post-content">
+                                <div class="name">
+                                    <label>${data.display_name}</label> @${data.username}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">今</span>
+                                    {% if current_user.is_authenticated %}
+                                    <button class="delete-comment-btn" data-comment-id="${data.post_id}" data-original-post-id="${postId}">
+                                        <span class="material-symbols-rounded">delete</span>
+                                    </button>
+                                    {% endif %}
                                 </div>
-                            <p class="reply-base"> 返信先： @${data.original_author_username || ''}</p> 
-                            <div class="post-body">
-                                ${data.content.replace(/\n/g, '<br>')} </div>
+                                <div class="post-body">
+                                    ${data.content.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
                         </div>
+                        <div class="post-footer">
+                            <div class="buttons">
+                                <button class="comment-btn" data-post-id="${data.post_id}" style="text-decoration: none;">
+                                    <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.2rem; cursor: pointer;">chat_bubble</span><span class="comment-count">0</span>
+                                </button>
+                                
+                                <form method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="button" class="unlike like-btn" data-post-id="${data.post_id}">
+                                        <span class="material-symbols-rounded">favorite</span><span class="like-count">0</span>
+                                    </button>
+                                </form>
+                                
+                                <button class="quote-btn" data-post-id="${data.post_id}" onclick="event.stopPropagation();">
+                                    <span class="material-symbols-rounded">repeat</span><span class="quote-count">0</span>
+                                </button>
+                            </div>
+                            <span>コメントID:${data.post_id}</span>
+                        </div>
+                        <a href="/posts/${data.post_id}/" class="post-link"></a>
                     `;
 
-                    // ★★★ newComment はここで定義・使用されているため、ReferenceErrorは発生しないはず ★★★
-                    commentList.prepend(newComment);
-                    textarea.value = ""; // テキストエリアをクリア
+                    commentList.prepend(newCommentUnit);
+                    textarea.value = "";
                     
-                    // コメント数カウンターを更新
-                    if (commentCountElement && data.comment_count !== undefined) {
-                        commentCountElement.textContent = data.comment_count;
+                    if (mainPostCommentCountElement && data.comment_count !== undefined) {
+                        mainPostCommentCountElement.textContent = data.comment_count;
                     }
+                    
+                    // 新しく追加した要素にイベントリスナーをアタッチ
+                    attachCommentEventListeners(newCommentUnit);
                 }
             })
             .catch(error => {
@@ -421,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     });
-    
+
     /* =========================================================
         5) 投稿削除
     ========================================================== */
@@ -443,74 +579,40 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.ok) {
-                    // 削除対象の投稿を画面から消す
                     const unit = btn.closest(".unit");
                     if (unit) unit.remove();
+                    // 削除後、ホームなどへリダイレクトするのが一般的だが、ここではそのまま。
                 }
-            });
-        });
-    });
-
-        /* =========================================================
-        5) コメント削除
-    ========================================================== */
-
-    document.querySelectorAll(".delete-comment-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (!confirm("このコメントを削除しますか？")) {
-                return;
-            }
-
-            const commentId = btn.dataset.commentId;
-            const originalPostId = btn.dataset.originalPostId; // コメント数更新用
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-            const parentComment = btn.closest(".comment"); // 削除対象のコメント要素
-
-            fetch(`/delete/${commentId}/`, { // 既存の delete_post ビューを再利用
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    // 1. コメントを画面から削除
-                    if (parentComment) {
-                        parentComment.remove();
-                    }
-                    
-                    // 2. コメント数を更新
-                    if (data.new_comment_count !== undefined) {
-                        const commentCountElement = document.querySelector(`.comment-count[data-post-id="${originalPostId}"]`);
-                        if (commentCountElement) {
-                            commentCountElement.textContent = data.new_comment_count;
-                        }
-                    }
-                } else {
-                    console.error("コメント削除失敗:", data.error);
-                }
-            })
-            .catch(error => {
-                console.error("ネットワークエラー:", error);
             });
         });
     });
 
     /* =========================================================
-        6) ログアウト警告
+        2) 自動リサイズ (変更なし)
+    ========================================================== */
+
+    document.querySelectorAll('.autoresize, .autoresize_new').forEach(textarea => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+
+    /* =========================================================
+        6) ログアウト警告 (変更なし)
     ========================================================== */
 
     document.querySelector(".logout-form").addEventListener("submit", function(event) {
-        // ユーザーがキャンセルした場合、フォームの送信を中止する
         if (!confirm("本当にログアウトしますか？")) {
-            event.preventDefault(); // フォームのデフォルトの送信動作をキャンセル
+            event.preventDefault();
         }
     });
 
     /* =========================================================
-        画像プレビュー機能 (最終安定版)
+        画像プレビュー機能 (変更なし)
     ========================================================== */
     const imageInput = document.getElementById('id_image'); 
     const imageIcon = document.getElementById('image-upload-icon'); 
@@ -518,48 +620,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewImage = document.getElementById('preview-image');
     const clearImageBtn = document.getElementById('clear-image-btn');
     
-    // 💡 アイコンの初期色を定義 (ユーザーのCSSに合わせて適宜変更してください)
     const INITIAL_ICON_COLOR = '#ffffff88'; 
     const SUCCESS_ICON_COLOR = '#4CAF50'; 
 
     if (imageInput && imageIcon && previewWrapper && previewImage && clearImageBtn) {
         
-        // 1. アイコンクリックでファイル選択ダイアログを開く
         imageIcon.addEventListener('click', function() {
-            imageInput.click(); // 隠された input を強制的にクリック
+            imageInput.click();
         });
         
-        // 2. ファイル選択後の 'change' イベント（プレビュー/リセットの本体）
         imageInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             
             if (file) {
-                // ファイルがある場合: プレビューを表示し、アイコンを緑色にする
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     previewImage.src = e.target.result;
-                    // CSSの上書きを回避するため、!importantで強制表示
                     previewWrapper.style.setProperty('display', 'block', 'important'); 
                 };
                 reader.readAsDataURL(file);
                 imageIcon.style.color = SUCCESS_ICON_COLOR;
-                clearImageBtn.style.display = 'block'; // クリアボタンを表示
+                clearImageBtn.style.display = 'block';
             } else {
-                // ファイルがない場合: プレビューを非表示にし、アイコンを初期色に戻す
                 previewWrapper.style.setProperty('display', 'none', 'important');
                 imageIcon.style.color = INITIAL_ICON_COLOR;
-                clearImageBtn.style.display = 'none'; // クリアボタンを非表示
+                clearImageBtn.style.display = 'none';
             }
         });
 
-        // 3. クリアボタンイベント (バツボタンの処理)
         clearImageBtn.addEventListener('click', function() {
-            // 🚨 ファイル入力をリセット（これによって files.length が 0 になる）
             imageInput.value = ''; 
-
-            // 💡 change イベントを手動で発火させる
-            //    これにより、上記の if/else ロジックの 'else' ブロックが実行され、
-            //    プレビュー非表示とアイコン色リセットが一括で行われる。
             imageInput.dispatchEvent(new Event('change')); 
         });
 
@@ -568,39 +658,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =========================================================
-        7) 画像モーダル処理
+        7) 画像モーダル処理 (変更なし)
     ========================================================== */
     const imageModal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const closeImageModal = document.getElementById('closeImageModal');
-    const thumbnails = document.querySelectorAll('.post-image-thumbnail'); // 全ての投稿画像を取得
+    const thumbnails = document.querySelectorAll('.post-image-thumbnail');
 
-    // 1. サムネイル画像をクリックしたときの処理
     thumbnails.forEach(thumbnail => {
         thumbnail.addEventListener('click', function() {
-            // クリックされた画像の URL を取得
             const imageUrl = this.src; 
-            
-            // モーダル画像に URL を設定
             modalImage.src = imageUrl; 
-            
-            // モーダルを表示
             imageModal.style.display = 'block';
         });
     });
 
-    // 2. 閉じるボタン (×) をクリックしたときの処理
     closeImageModal.addEventListener('click', function() {
         imageModal.style.display = 'none';
     });
 
-    // 3. モーダルの背景をクリックしたときの処理 (モーダル全体)
     imageModal.addEventListener('click', function(e) {
-        // クリックされた要素がモーダル自身（背景）であれば閉じる
         if (e.target === imageModal) {
             imageModal.style.display = 'none';
         }
     });
+
+    /* =========================================================
+        初期ロード時のイベントリスナー設定
+    ========================================================== */
+    setupLikeButtons(); // 既存のいいねボタンにリスナーを設定
+    setupQuoteButtons(); // 既存の引用ボタンにリスナーを設定
+    setupDeleteCommentButtons(); // 既存のコメント削除ボタンにリスナーを設定
 });
 </script>
 

@@ -2,12 +2,36 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import PostForm
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
-from .models import Like, Post # 1. Comment のインポートを削除
-from django.db.models import Count
-import json
+from .models import Like, Post
 from django.db.models import Count, Case, When, BooleanField
+import json
+from django.db.models import Q # Qをインポート
 
+# =========================================================
+# 補助関数：祖先投稿の再帰的な取得
+# =========================================================
+def get_post_ancestors(post):
+    """
+    現在のPostオブジェクトから最上位の親投稿まで、すべての祖先投稿を取得する。
+    """
+    ancestors = []
+    current_post = post
+    
+    # commented_post が null になるまで遡る (ただし、元のPostオブジェクトを直接参照する)
+    while current_post.commented_post:
+        # 祖先をリストに追加 (古いコメントがリストの先頭になる)
+        ancestors.insert(0, current_post.commented_post)
+        
+        # 次の親投稿へ移動
+        current_post = current_post.commented_post
+        
+    return ancestors
+
+# =========================================================
+# index
+# =========================================================
 def index(request):
+    # (既存の index 関数ロジック...省略)
     posts = (
             Post.objects.select_related('author', 'quoted_post', 'quoted_post__author')
             .filter(commented_post__isnull=True)
@@ -19,20 +43,16 @@ def index(request):
             .order_by("-post_id")
         )
                         
-    # 新規投稿処理（元のまま）
     if request.method == "POST":
         if request.user.is_authenticated:
-            # いいねボタン押下か判定
             if "toggle_like" in request.POST:
                 post_id = request.POST.get("post_id")
-                # Post ID (CharField)で検索
                 post = get_object_or_404(Post, post_id=post_id) 
                 like, created = Like.objects.get_or_create(post=post, user=request.user)
                 if not created:
-                    like.delete()  # 既にいいね済みなら解除
+                    like.delete()
                 return redirect("posts:index")
 
-            # 投稿フォーム処理
             form = PostForm(request.POST, request.FILES)
             if form.is_valid():
                 post = form.save(commit=False)
@@ -44,15 +64,12 @@ def index(request):
     else:
         form = PostForm()
 
-    # [3] 各投稿のいいね判定と、集計結果の割り当て
     for post in posts:
-        # 個人のいいね判定 (個別のクエリが必要)
         if request.user.is_authenticated:
             post.is_liked = post.likes.filter(user=request.user).exists()
         else:
             post.is_liked = False
             
-        # アノテーションの結果をテンプレート変数に割り当てる
         post.like_count = post.like_count_anno
         post.comment_count = post.comment_count_anno
         post.quote_count = post.quote_count_anno
@@ -64,6 +81,10 @@ def index(request):
     }
     return render(request, "posts/index.html", context)
 
+# =========================================================
+# toggle_like, add_comment, quote_post, delete_post, timeline (省略)
+# =========================================================
+
 @login_required
 def toggle_like(request):
     if request.method == "POST":
@@ -71,9 +92,8 @@ def toggle_like(request):
         post = get_object_or_404(Post, post_id=post_id)
         like, created = Like.objects.get_or_create(post=post, user=request.user)
         if not created:
-            like.delete()  # 既にいいね済みなら解除
+            like.delete()
 
-        # 現在のいいね数と状態を返す
         return JsonResponse({
             "is_liked": post.likes.filter(user=request.user).exists(),
             "like_count": post.likes.count()
@@ -87,7 +107,6 @@ def add_comment(request, post_id):
         content = request.POST.get('text')
         
         if content:
-            # Postモデルとしてコメントを作成
             new_comment = Post.objects.create(
                 author=request.user,
                 content=content,
@@ -97,18 +116,14 @@ def add_comment(request, post_id):
             original_author_username = original_post.author.username
             new_comment_count = original_post.comments.count()
             
-            # ★★★ 修正点: ユーザーアイコンURLの取得ロジックを安全に変更 ★★★
-            # ユーザーアイコンがある場合はそのURLを返し、ない場合は空の文字列を返す
             icon_url = new_comment.author.icon.url if new_comment.author.icon else ""
             
             return JsonResponse({
                 "ok": True,
                 "post_id": new_comment.post_id,
-                # ユーザー情報 (authorから取得)
                 "username": new_comment.author.username,
                 "display_name": new_comment.author.display_name,
-                "icon_url": icon_url, # 修正した変数を使用
-                # コメント本文
+                "icon_url": icon_url,
                 "content": new_comment.content,
                 "original_author_username": original_author_username,
                 "comment_count": new_comment_count
@@ -137,8 +152,6 @@ def timeline(request):
     posts = Post.objects.select_related("quoted_post").order_by("-created_at")
     return render(request, "timeline.html", {"posts": posts})
 
-# posts/views.py (delete_post 関数) の修正
-
 @login_required
 def delete_post(request, post_id):
     if request.method != "POST":
@@ -146,94 +159,102 @@ def delete_post(request, post_id):
 
     post_to_delete = get_object_or_404(Post, post_id=post_id)
 
-    # 投稿者のみ削除可能
     if request.user != post_to_delete.author:
         return JsonResponse({"error": "Permission denied"})
         
-    # ★ コメントだった場合、親投稿のIDを取得しておく ★
     original_post_id = post_to_delete.commented_post.post_id if post_to_delete.commented_post else None
 
     post_to_delete.delete()
     
-    # ★ 削除されたのがコメントだった場合、コメント数を再計算して返す ★
     new_comment_count = None
     if original_post_id:
         try:
             original_post = Post.objects.get(post_id=original_post_id)
             new_comment_count = original_post.comments.count()
         except Post.DoesNotExist:
-            pass # 元の投稿が既に削除されていた場合は無視
+            pass
 
     return JsonResponse({
         "ok": True,
-        "new_comment_count": new_comment_count # コメント数を含めて返す
+        "new_comment_count": new_comment_count
     })
 
+
+# =========================================================
+# post_detail (祖先取得ロジックを組み込み)
+# =========================================================
+@login_required
 def post_detail(request, post_id): 
-    # 4. 関数が重複定義されていたため、統合されたロジックを使用
     current_user = request.user
-    # データベース検索と集計 (annotate) を同時に実行
-    post = get_object_or_404(
+    
+    # 1. メイン投稿の生のオブジェクトを取得
+    main_post_raw = get_object_or_404(
         Post.objects.select_related('author', 'quoted_post', 'quoted_post__author')
-                    # コメントは Post モデルのインスタンスとして related_name='comments' で取得
-                    .prefetch_related('comments', 'comments__author') 
-                    .annotate(
-                        like_count_anno=Count('likes', distinct=True),
-                        comment_count_anno=Count('comments', distinct=True),
-                        quote_count_anno=Count('quoted_post__quoted_by', distinct=True) # 引用数をカウント
-                    ), 
-        post_id=post_id # post_id (CharField) で検索
+                    .prefetch_related('comments', 'comments__author'),
+        post_id=post_id
     )
 
-    comments = Post.objects.select_related('author') \
-                           .filter(commented_post__post_id=post_id) \
-                           .annotate(
-                               # コメントにユーザーがいいねしているかの判定 (is_liked_anno) を追加
-                               is_liked_anno=Case(
-                                   When(likes__user=current_user, then=True),
-                                   default=False,
-                                   output_field=BooleanField()
-                               ),
-                               like_count_anno=Count('likes', distinct=True),
-                               quote_count_anno=Count('quoted_post__quoted_by', distinct=True),
-                               comment_count_anno=Count('comments', distinct=True),
-                           ) \
-                           .order_by("post_id")
+    # 2. 祖先投稿の生のオブジェクトリストを取得 (再帰)
+    ancestor_posts_raw = get_post_ancestors(main_post_raw)
     
-    comment_list = []
-    for comment in comments:
-        comment_list.append({
-            'post_id': comment.post_id,
-            'content': comment.content,
-            'author': comment.author,
-            'created_at': comment.created_at,
-            'image': comment.image,
-            # ★★★ ここで is_liked の値を設定 ★★★
-            'is_liked': comment.is_liked_anno,
-            'like_count': comment.like_count_anno,
-            'quote_count': comment.quote_count_anno,
-            'comment_count': comment.comment_count_anno,
-            # commented_post はコメント元の投稿なので不要
-        })
+    # 3. メイン投稿とすべての祖先投稿のIDリストを作成
+    post_ids_to_fetch = [p.post_id for p in ancestor_posts_raw] + [main_post_raw.post_id]
     
-    # テンプレートでアクセスしやすいように、集計結果を属性として割り当てる
-    post.like_count = post.like_count_anno
-    post.comment_count = post.comment_count_anno
-    post.quote_count = post.quote_count_anno
+    # 4. すべての関連投稿を一度にアノテーション付きで取得し直す
+    annotated_posts = Post.objects.select_related('author', 'quoted_post', 'quoted_post__author') \
+                                  .filter(post_id__in=post_ids_to_fetch) \
+                                  .annotate(
+                                      is_liked_anno=Case(
+                                          When(likes__user=current_user, then=True), default=False, output_field=BooleanField()
+                                      ),
+                                      like_count_anno=Count('likes', distinct=True),
+                                      comment_count_anno=Count('comments', distinct=True),
+                                      quote_count_anno=Count('quoted_post__quoted_by', distinct=True),
+                                  )
 
-    # 個人のいいね判定
-    if request.user.is_authenticated:
-        post.is_liked = post.likes.filter(user=request.user).exists()
-    else:
-        post.is_liked = False
+    # 5. 取得したデータをIDでマップ
+    annotated_map = {p.post_id: p for p in annotated_posts}
     
-    # 4. コメントの取得：Post モデルのインスタンスとして取得する
-    comments = post.comments.all().select_related('author').order_by('created_at')
+    # 6. ラッピング関数
+    def wrap_post_data(p):
+        return {
+            'post_id': p.post_id,
+            'content': p.content,
+            'author': p.author,
+            'author_username': p.author.username,
+            'created_at': p.created_at,
+            'image': p.image,
+            'quoted_post': p.quoted_post,
+            'repost': p.repost,
+            # アノテーション結果をフィールドとして追加
+            'is_liked': getattr(p, 'is_liked_anno', False),
+            'like_count': getattr(p, 'like_count_anno', 0),
+            'quote_count': getattr(p, 'quote_count_anno', 0),
+            'comment_count': getattr(p, 'comment_count_anno', 0),
+            'is_comment': p.commented_post is not None, # コメントかどうかのフラグ
+        }
 
+    # 7. メイン投稿と祖先投稿のデータを整備
+    annotated_main_post = annotated_map.get(main_post_raw.post_id)
+    annotated_ancestors = [annotated_map.get(p.post_id) for p in ancestor_posts_raw]
+
+    # 8. コメントの取得 (メイン投稿に紐づく直下のコメントのみ)
+    comments_queryset = Post.objects.select_related('author') \
+                                  .filter(commented_post=annotated_main_post) \
+                                  .annotate(
+                                      is_liked_anno=Case(When(likes__user=current_user, then=True), default=False, output_field=BooleanField()),
+                                      like_count_anno=Count('likes', distinct=True),
+                                      quote_count_anno=Count('quoted_post__quoted_by', distinct=True),
+                                      comment_count_anno=Count('comments', distinct=True),
+                                  ) \
+                                  .order_by("post_id") 
+
+    comment_list = [wrap_post_data(comment) for comment in comments_queryset]
+    
     context = {
-        'post': post,
-        'comments': comments,
-        'current_user': request.user,
-        'comments': comment_list,
+        'current_user': current_user,
+        'post': wrap_post_data(annotated_main_post), # メイン投稿
+        'ancestor_posts_path': [wrap_post_data(p) for p in annotated_ancestors if p], # 祖先投稿のリスト
+        'comments': comment_list, # 直下のコメント
     }
     return render(request, 'posts/detail.html', context)

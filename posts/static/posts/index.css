@@ -423,7 +423,8 @@ p.comment-text{
 
 .quoted-unit{
     border: none;
-    padding-bottom: 0;
+    padding: 0;
+    margin-top: 1rem;
 }
 
 button.delete-btn{
