@@ -1,0 +1,15 @@
+# Pythonの仮想環境
+venv/
+__pycache__/
+
+# Git関連のファイル
+.git/
+
+# 大きなファイルや一時ファイル (もしあれば)
+*.log
+*.tmp
+*.zip
+data/  # もし巨大なデータフォルダがあれば除外
+
+# Docker関連自体は不要
+.dockerignore
