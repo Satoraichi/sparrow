@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # 1. Django アプリケーションコンテナ
+  web:
+    build: .
+    container_name: django-sparrow-web
+    command: gunicorn sparrow.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app # 開発中はソースコードをマウント
+    ports:
+      - "8000:8000" # NASのポート8000をコンテナのポート8000にマッピング
+    env_file:
+      - .env # 環境変数を格納したファイルを指定
+    depends_on:
+      - db
+
+  # 2. PostgreSQL データベースコンテナ
+  db:
+    image: postgres:14-alpine
+    container_name: django-sparrow-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    expose: # Webコンテナからのみアクセスできるようにポートを公開
+      - 5432
+
+volumes:
+  postgres_data:
