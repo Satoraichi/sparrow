@@ -13,3 +13,5 @@ data/  # もし巨大なデータフォルダがあれば除外
 
 # Docker関連自体は不要
 .dockerignore
+
+.env
