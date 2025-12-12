@@ -70,7 +70,23 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'sparrow.urls'
 
-# ... (TEMPLATES, WSGI_APPLICATION の設定は省略) ...
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],  # プロジェクト全体のテンプレート用ディレクトリ (推奨)
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'sparrow.wsgi.application'
 
 
 # ==============================================================================
