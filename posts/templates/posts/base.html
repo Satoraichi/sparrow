@@ -6,15 +6,50 @@
         <title>{% block title %}ログイン | Sparrow{% endblock %}</title>
         <link rel="preload" href="{% static 'posts/base.css' %}" as="style">
         <link rel="stylesheet" href="{% static 'posts/base.css' %}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         {% comment %} Material Symbols Rounded {% endcomment %}
         <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <noscript>
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
         </noscript>
         {% block extra_style %}{% endblock %}
     </head>
     <body>
         <main>
+            <div id="quoteModal">
+                <div class="modal-content">
+                    <textarea id="quoteText" placeholder="コメントを追加する..."></textarea>
+                    <input type="hidden" id="quotePostId">
+                    <div id="quotedOriginal" style="padding:.6rem; border-left:3px solid #8885; margin-bottom:1rem;"></div>
+                    <div style="display:flex; justify-content:space-between; gap:.6rem; margin-top:.8rem;">
+                        <button id="closeModal" class="basic polygon-clip-n35">閉じる</button>
+                        <button id="sendQuote" class="basic polygon-clip-n35">ポスト</button>
+                    </div>
+                </div>
+            </div>
+            <div class="login_status polygon-clip-n30">
+                <div class="status">
+                    <div class="icon_background">
+                        {% if current_user.icon %}
+                            <img src="{{ current_user.icon.url }}" class="icon">
+                        {% endif %}
+                    </div>
+                    {% if current_user.is_authenticated %}
+                    <div class="user">
+                        <div class="name"><label>{{ current_user.display_name }}</label> @{{ current_user.username }}</div>
+                    {% endif %}
+                    </div>
+                </div>
+                {% if current_user.is_authenticated %}
+                <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button polygon-clip-n35">ログアウト</button>
+                </form>
+                {% endif %}
+            </div>
         {% block content %}{% endblock %}
         </main>
     </body>

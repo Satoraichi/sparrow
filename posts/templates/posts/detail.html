@@ -10,262 +10,232 @@
 
 {% block content %}
 
-<div id="quoteModal">
-    <div class="modal-content">
-        <textarea id="quoteText" placeholder="コメントを追加する..."></textarea>
-        <input type="hidden" id="quotePostId">
-        <div id="quotedOriginal" style="padding:.6rem; border-left:3px solid #8885; margin-bottom:1rem;"></div>
-        <div style="display:flex; justify-content:space-between; gap:.6rem; margin-top:.8rem;">
-            <button id="closeModal" class="basic" style="background-color:#ff492d;">閉じる</button>
-            <button id="sendQuote" class="basic">ポスト</button>
-        </div>
-    </div>
-</div>
-
-<div class="login_status">
-    <div class="status">
-        <div class="icon_background">
-            {% if current_user.icon %}
-                <img src="{{ current_user.icon.url }}" class="icon">
-            {% endif %}
-        </div>
-        {% if current_user.is_authenticated %}
-        <div class="user">
-            <div class="name"><label>{{ current_user.display_name }}</label> @{{ current_user.username }}</div>
-        {% endif %}
-        </div>
-    </div>
-    {% if current_user.is_authenticated %}
-    <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
-        {% csrf_token %}
-        <button type="submit" class="logout-button">ログアウト</button>
-    </form>
-    {% endif %}
-</div>
-
 <div class="posts-wrapper">
-    <h2 style="color: #fff; margin-bottom: 1rem;">ポスト詳細</h2>
+    <div class="pw_background"></div>
+    <div class="pw_content">
+        <h2 style="color: #fff; margin-bottom: 1rem;">ポスト詳細</h2>
 
-    {% if ancestor_posts_path %}
-        {% for ancestor in ancestor_posts_path %}
-        <div class="unit ancestor-unit" data-post-id="{{ ancestor.post_id }}">
-            <div class="hierarchy-connect"></div>
-            <div class="post" style="cursor: pointer;">
+        {% if ancestor_posts_path %}
+            {% for ancestor in ancestor_posts_path %}
+            <div class="unit ancestor-unit" data-post-id="{{ ancestor.post_id }}">
+                <div class="hierarchy-connect"></div>
+                <div class="post" style="cursor: pointer;">
+                    <div class="icon_background">
+                        {% if ancestor.author.icon %}
+                            <img src="{{ ancestor.author.icon.url }}" class="icon">
+                        {% endif %}
+                    </div>
+                    
+                    <div class="post-content">
+                        <div class="name">
+                            <label>{{ ancestor.author.display_name }}</label> @{{ ancestor.author.username }}
+                            <span style="margin-left: auto; font-size: 0.8rem; color: #8d8d8d;">
+                                {{ ancestor.created_at|timesince }}前
+                            </span>
+                        </div>
+                        
+                        <div class="post-body">
+                            {{ ancestor.content|linebreaksbr|truncatechars:100 }}
+                            {% if ancestor.image %}
+                                <div class="post-image">
+                                    <img src="{{ ancestor.image.url }}" class="post-image-thumbnail" alt="投稿画像">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post-footer ancestor-footer">
+                    <div class="buttons">
+                        <button class="comment-btn" onclick="location.href='{% url 'posts:detail' ancestor.post_id %}'" style="text-decoration: none;">
+                            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ ancestor.comment_count }}</span>
+                        </button>
+                        
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            {% if ancestor.is_liked %}
+                                <button type="button" class="liked like-btn" data-post-id="{{ ancestor.post_id }}">
+                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
+                                </button>
+                            {% else %}
+                                <button type="button" class="unlike like-btn" data-post-id="{{ ancestor.post_id }}">
+                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                        <button class="quote-btn" data-post-id="{{ ancestor.post_id }}">
+                            <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ ancestor.quote_count }}</span>
+                        </button>
+                    </div>
+                    <span>ポストID:{{ ancestor.post_id }}</span>
+                </div>
+                <a href='{% url 'posts:detail' ancestor.post_id %}' class="post-link"></a>
+            </div>
+
+            {% endfor %}
+        {% endif %}
+        <div class="unit"> 
+            <div class="post">
                 <div class="icon_background">
-                    {% if ancestor.author.icon %}
-                        <img src="{{ ancestor.author.icon.url }}" class="icon">
+                    {% if post.author.icon %}
+                    <img src="{{ post.author.icon.url }}" class="icon">
                     {% endif %}
                 </div>
                 
                 <div class="post-content">
                     <div class="name">
-                        <label>{{ ancestor.author.display_name }}</label> @{{ ancestor.author.username }}
-                        <span style="margin-left: auto; font-size: 0.8rem; color: #8d8d8d;">
-                            {{ ancestor.created_at|timesince }}前
+                        <label>{{ post.author.display_name }}</label> @{{ post.author.username }}
+                        <span style="margin-left: auto; font-size: 1rem; color: #d8d8d8;">
+                            {{ post.created_at|timesince }}前
                         </span>
-                    </div>
-                    
-                    <div class="post-body">
-                        {{ ancestor.content|linebreaksbr|truncatechars:100 }}
-                        {% if ancestor.image %}
-                            <div class="post-image">
-                                <img src="{{ ancestor.image.url }}" class="post-image-thumbnail" alt="投稿画像">
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="post-footer ancestor-footer">
-                <div class="buttons">
-                    <button class="comment-btn" onclick="location.href='{% url 'posts:detail' ancestor.post_id %}'" style="text-decoration: none;">
-                        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ ancestor.comment_count }}</span>
-                    </button>
-                    
-                    <form method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        {% if ancestor.is_liked %}
-                            <button type="button" class="liked like-btn" data-post-id="{{ ancestor.post_id }}">
-                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
-                            </button>
-                        {% else %}
-                            <button type="button" class="unlike like-btn" data-post-id="{{ ancestor.post_id }}">
-                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ ancestor.like_count }}</span>
-                            </button>
-                        {% endif %}
-                    </form>
-                    
-                    <button class="quote-btn" data-post-id="{{ ancestor.post_id }}">
-                        <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ ancestor.quote_count }}</span>
-                    </button>
-                </div>
-                <span>ポストID:{{ ancestor.post_id }}</span>
-            </div>
-            <a href='{% url 'posts:detail' ancestor.post_id %}' class="post-link"></a>
-        </div>
-
-        {% endfor %}
-    {% endif %}
-    <div class="unit"> 
-        <div class="post">
-            <div class="icon_background">
-                {% if post.author.icon %}
-                <img src="{{ post.author.icon.url }}" class="icon">
-                {% endif %}
-            </div>
-            
-            <div class="post-content">
-                <div class="name">
-                    <label>{{ post.author.display_name }}</label> @{{ post.author.username }}
-                    <span style="margin-left: auto; font-size: 1rem; color: #d8d8d8;">
-                        {{ post.created_at|timesince }}前
-                    </span>
-                    
-                    {% if current_user == post.author %}
-                    <button class="delete-btn" data-post-id="{{ post.post_id }}">
-                        <span class="material-symbols-rounded">delete</span>
-                    </button>
-                    {% endif %}
-                </div>
-
-                <div class="post-body">
-                    {{ post.content|linebreaksbr}}
-                        {% if post.image %}
-                        <div class="post-image">
-                            <img src="{{ post.image.url }}" class="post-image-thumbnail" alt="投稿画像">
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        {% if post.quoted_post %}
-        <div class="unit quoted-unit" data-post-id="{{ post.quoted_post.post_id }}">
-            <div class="post quoted-post">
-                <div class="icon_background">
-                    {% if post.quoted_post.author.icon %}
-                        <img src="{{ post.quoted_post.author.icon.url }}" class="icon">
-                    {% endif %}
-                </div>
-
-                <div class="post-content">
-                    <div class="name">
-                        <label>{{ post.quoted_post.author.display_name }}</label>
-                        @{{ post.quoted_post.author.username }}
-                        <span style="margin-left: auto; font-size: 0.9rem; color: #bdbdbd;">
-                            {{ post.quoted_post.created_at|timesince }}前
-                        </span>
-                    </div>
-
-                    <div class="post-body">
-                        {{ post.quoted_post.content|linebreaksbr }}
-                        {% if post.quoted_post.image %}
-                            <div class="post-image">
-                                <img src="{{ post.quoted_post.image.url }}" alt="quoted image">
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <a href="{% url 'posts:detail' post.quoted_post.post_id %}" class="post-link"></a>
-            </div>
-        </div>
-        {% elif post.repost and not post.quoted_post %}
-        <div class="unit quoted-unit">
-            <div class="post quoted-post">
-                <div class="none"><p>このポストは削除されています。</p></div>
-            </div>
-        </div>
-        {% endif %}
-        
-        <div class="post-footer">
-            <div class="buttons">
-                <button class="comment-btn" onclick="location.href='{% url 'posts:detail' post.post_id %}'" style="text-decoration: none;">
-                    <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ post.comment_count }}</span>
-                </button>
-                <form method="POST" style="display:inline;">
-                    {% csrf_token %}
-                    {% if post.is_liked %}
-                        <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}" >
-                            <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
-                        </button>
-                    {% else %}
-                        <button type="button" class="unlike like-btn" data-post-id="{{ post.post_id }}">
-                            <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
-                        </button>
-                    {% endif %}
-                </form>
-                <button class="quote-btn" data-post-id="{{ post.post_id }}">
-                    <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ post.quote_count }}</span>
-                </button>
-            </div>
-            <span>ポストID:{{ post.post_id }}</span>
-        </div>
-    </div>
-    
-    {% if current_user.is_authenticated %}
-    <div class="comment-form">
-        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
-        <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
-        <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
-    </div>
-    {% endif %}
-
-    <div class="comment-list" data-post-id="{{ post.post_id }}">
-        {% for comment in comments %}
-        <div class="comment-unit">
-            <div class="comment">
-                <div class="icon_background">
-                    {% if comment.author.icon %}
-                    <img src="{{ comment.author.icon.url }}" class="icon">
-                    {% endif %}
-                </div>
-                <div class="post-content">
-                    <div class="name">
-                        <label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span>
-                        {% if current_user.post_id == comment.author.id %}
-                        <button class="delete-comment-btn" data-comment-id="{{ comment.post_id }}" data-original-post-id="{{ post.post_id }}">
+                        
+                        {% if current_user == post.author %}
+                        <button class="delete-btn" data-post-id="{{ post.post_id }}">
                             <span class="material-symbols-rounded">delete</span>
                         </button>
                         {% endif %}
                     </div>
+
                     <div class="post-body">
-                        {{ comment.content|linebreaksbr}}
-                            {% if comment.image %}
+                        {{ post.content|linebreaksbr}}
+                            {% if post.image %}
                             <div class="post-image">
-                                <img src="{{ comment.image.url }}" class="post-image-thumbnail" alt="投稿画像">
+                                <img src="{{ post.image.url }}" class="post-image-thumbnail" alt="投稿画像">
                             </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
+            
+            {% if post.quoted_post %}
+            <div class="unit quoted-unit" data-post-id="{{ post.quoted_post.post_id }}">
+                <div class="post quoted-post polygon-clip-n30">
+                    <div class="icon_background">
+                        {% if post.quoted_post.author.icon %}
+                            <img src="{{ post.quoted_post.author.icon.url }}" class="icon">
+                        {% endif %}
+                    </div>
+
+                    <div class="post-content">
+                        <div class="name">
+                            <label>{{ post.quoted_post.author.display_name }}</label>
+                            @{{ post.quoted_post.author.username }}
+                            <span style="margin-left: auto; font-size: 0.9rem; color: #bdbdbd;">
+                                {{ post.quoted_post.created_at|timesince }}前
+                            </span>
+                        </div>
+
+                        <div class="post-body">
+                            {{ post.quoted_post.content|linebreaksbr }}
+                            {% if post.quoted_post.image %}
+                                <div class="post-image">
+                                    <img src="{{ post.quoted_post.image.url }}" alt="quoted image">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a href="{% url 'posts:detail' post.quoted_post.post_id %}" class="post-link"></a>
+                </div>
+            </div>
+            {% elif post.repost and not post.quoted_post %}
+            <div class="unit quoted-unit">
+                <div class="post quoted-post unit-none polygon-clip-n30">
+                    <div class="none"><p>このポストは削除されています。</p></div>
+                </div>
+            </div>
+            {% endif %}
+            
             <div class="post-footer">
                 <div class="buttons">
-                    <button class="comment-btn" data-post-id="{{ comment.post_id }}" style="text-decoration: none;">
-                        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.2rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
+                    <button class="comment-btn" onclick="location.href='{% url 'posts:detail' post.post_id %}'" style="text-decoration: none;">
+                        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.5rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ post.comment_count }}</span>
                     </button>
-                    
                     <form method="POST" style="display:inline;">
                         {% csrf_token %}
-                        {% if comment.is_liked %}
-                            <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}">
-                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                        {% if post.is_liked %}
+                            <button type="button" class="liked like-btn" data-post-id="{{ post.post_id }}" >
+                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
                             </button>
                         {% else %}
-                            <button type="button" class="unlike like-btn" data-post-id="{{ comment.post_id }}">
-                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                            <button type="button" class="unlike like-btn" data-post-id="{{ post.post_id }}">
+                                <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ post.like_count }}</span>
                             </button>
                         {% endif %}
                     </form>
-                    
-                    <button class="quote-btn" data-post-id="{{ comment.post_id }}">
-                        <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ comment.quote_count }}</span>
+                    <button class="quote-btn" data-post-id="{{ post.post_id }}">
+                        <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ post.quote_count }}</span>
                     </button>
                 </div>
-                <span>コメントID:{{ comment.post_id }}</span>
+                <span class="ID_index">ポストID:{{ post.post_id }}</span>
             </div>
-            <a href="{% url 'posts:detail' comment.post_id %}" class="post-link"></a>
         </div>
-        {% endfor %}
+        
+        {% if current_user.is_authenticated %}
+        <div class="comment-form">
+            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#ffffff88; margin-left:.4rem; margin-top:.3rem;">chat_bubble</span>
+            <textarea class="autoresize_new" data-post-id="{{ post.post_id }}" placeholder="コメントする…"></textarea>
+            <button type="button" class="send-comment-btn" data-post-id="{{ post.post_id }}">送信</button>
+        </div>
+        {% endif %}
+
+        <div class="comment-list" data-post-id="{{ post.post_id }}">
+            {% for comment in comments %}
+            <div class="comment-unit">
+                <div class="comment">
+                    <div class="icon_background">
+                        {% if comment.author.icon %}
+                        <img src="{{ comment.author.icon.url }}" class="icon">
+                        {% endif %}
+                    </div>
+                    <div class="post-content">
+                        <div class="name">
+                            <label>{{ comment.author.display_name }}</label> @{{ comment.author.username }}<span style="margin-left: auto; font-size: .8rem; color: #ccc;">{{ comment.created_at|timesince }}前</span>
+                            {% if current_user.post_id == comment.author.id %}
+                            <button class="delete-comment-btn" data-comment-id="{{ comment.post_id }}" data-original-post-id="{{ post.post_id }}">
+                                <span class="material-symbols-rounded">delete</span>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div class="post-body">
+                            {{ comment.content|linebreaksbr}}
+                                {% if comment.image %}
+                                <div class="post-image">
+                                    <img src="{{ comment.image.url }}" class="post-image-thumbnail" alt="投稿画像">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="post-footer">
+                    <div class="buttons">
+                        <button class="comment-btn" data-post-id="{{ comment.post_id }}" style="text-decoration: none;">
+                            <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0; color:#fffffff; margin-left:.4rem; margin-top:.3rem; font-size: 1.2rem; cursor: pointer;">chat_bubble</span><span class="comment-count">{{ comment.comment_count }}</span>
+                        </button>
+                        
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            {% if comment.is_liked %}
+                                <button type="button" class="liked like-btn" data-post-id="{{ comment.post_id }}">
+                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                                </button>
+                            {% else %}
+                                <button type="button" class="unlike like-btn" data-post-id="{{ comment.post_id }}">
+                                    <span class="material-symbols-rounded">favorite</span><span class="like-count">{{ comment.like_count }}</span>
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                        <button class="quote-btn" data-post-id="{{ comment.post_id }}">
+                            <span class="material-symbols-rounded">repeat</span><span class="quote-count">{{ comment.quote_count }}</span>
+                        </button>
+                    </div>
+                    <span class="ID_index">コメントID:{{ comment.post_id }}</span>
+                </div>
+                <a href="{% url 'posts:detail' comment.post_id %}" class="post-link"></a>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
@@ -581,22 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (unit) unit.remove();
                 }
             });
-        });
-    });
-
-
-    /* =========================================================
-        5. 自動リサイズ (2)
-    ========================================================== */
-
-    document.querySelectorAll('.autoresize, .autoresize_new').forEach(textarea => {
-        // 初期リサイズ
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
         });
     });
 
