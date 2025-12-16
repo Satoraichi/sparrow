@@ -25,22 +25,18 @@ html {
 }
 
 /*パラメータ設定*/
-body {
-    --background-color: linear-gradient(60deg, #12161c, #141b27, #15233c);
-    --color: #ffffff;
-    --label-color: #787878;
+:root {
+    --background-color: linear-gradient(60deg, #eea3b1, #f5bfc9, #eccdd5);
+    --color: #5e052a;
+    --label-color: #76304cdd;
     --re-color: #fff;
-    --theme-color1: #fbe56a;
-    --theme-shadow-color: #cdd297bb;
-    --theme-color2: #e7d885;
-    --card-color: #ffffffee;
-    --accent-color1: #1aaf7d;
-    --accent-color2: #198863;
-    --accent-shadow-color: #2a5457bb;
-    --re-accent-shadow-color: #c4c46cbb;
-    --accent-bg-color: #fbfdce50;
+    --theme-color1: #af8490;
+    --theme-color2: #ecc9d3;
+    --accent-color1: #bb3077;
+    --accent-color2: #e32844;
+    --accent-bg-color: ;
     --title-font: "Shippori Mincho", sans-serif;
-    --text-font: "fot-tsukuardgothic-std" ,sans-serif;
+    --text-font: "fot-tsukuardgothic-std B" ,sans-serif;
     --text-font-B: "fot-tsukuardgothic-std B", sans-serif;
     --button-font: "fot-tsukuardgothic-std", sans-serif;
     --button-font-B: "fot-tsukuardgothic-std B" ,sans-serif;
@@ -48,18 +44,14 @@ body {
 
 body.dark-mode {
     --background-color: linear-gradient(80deg, #12161c, #141b27, #15233c);
-    --color: #ffffff;
-    --label-color: #b9b9b9;
+    --color: #e1e5fd;
+    --label-color: #b1bfe6dd;
     --re-color: #000;
-    --theme-color1: #298e90;
-    --theme-color2: #237684;
-    --theme-shadow-color: #2e4a4cbb;
-    --card-color: #262623aa;
-    --accent-color1: #ddb462;
-    --accent-color2: #d5b56f;
-    --accent-shadow-color: #cdd297bb;
-    --re-accent-shadow-color: #2a5057bb;
-    --accent-bg-color: #404f4aaa;
+    --theme-color1: ;
+    --theme-color2: ;
+    --accent-color1: #1c7aff;
+    --accent-color2: #e1e7fe;
+    --accent-bg-color: ;
 }
 
 body {
@@ -67,7 +59,6 @@ body {
     flex-flow: column;
     background: var(--background-color);
     color: var(--color);
-    padding-top: calc(20px + env(safe-area-inset-top));
     width: 100%;
     height: 100%;
     min-height: 100dvh;
@@ -79,6 +70,7 @@ body {
     transition: 2s all;
     -ms-overflow-style: none;
     font-family: var(--text-font);
+    transition-property: background;
 }
 
 body::-webkit-scrollbar {
@@ -151,16 +143,26 @@ button.basic{
     font-family: var(--text-font-B);
     font-size: 1rem;
     color: #fff;
-    background-color: #1c7aff;
+    background-color: var(--accent-color1);
     border: none;
     transition: 0.4s ease;
     --corner-radius: 1.4rem;
 }
 
+    body.dark-mode button.basic{
+        color: #fff;
+        background-color: var(--accent-color1);
+    }
+
 button.basic:hover{
-    background: #e3efff;
-    color: #0b6bf2;
+    background: var(--theme-color2);
+    color: var(--accent-color2);
 }
+
+    body.dark-mode button.basic:hover{
+        background: #e3efff;
+        color: #0b6bf2;
+    }
 
 button.basic_2{
     box-sizing: border-box;
@@ -189,6 +191,10 @@ textarea {
     border: none;
     outline: none;
     color: #ffffff
+}
+
+textarea::placeholder{
+    color: var(--label-color);
 }
 
 .login{
@@ -362,12 +368,17 @@ main{
     width: 20%;
     max-width: 500px;
     height: max-content;
-    background-color: #57585844;
+    background-color: #ebc2ce88;
     padding: 2rem;
     --corner-radius: 5rem;
     border-radius: 3.5rem;
-    box-shadow: inset 0 0 15px 10px #5a627025;
+    box-shadow: inset 0 0 15px 10px #fadee488;
 }
+
+    body.dark-mode .login_status{
+        background-color: #57585844;
+        box-shadow: inset 0 0 15px 10px #5a627025;
+    }
 
 .status{
     display: flex;
@@ -446,21 +457,33 @@ main{
     top: 0;
     width: 100%;
     height: 100%;
-    box-shadow:  0 0 10px 10px #46506218;
+    box-shadow: none;
 }
+
+    body.dark-mode .posts-wrapper .pw_background{
+        box-shadow:  0 0 10px 10px #46506218;
+    }
 
 .posts-wrapper .pw_content{
     box-sizing: border-box;
-    background:linear-gradient(80deg, #1e2633, #1c293d, #1b2b42);
+    background: #ffe3ee44;
     padding: 2rem;
     --corner-radius: 5.5rem;
     clip-path: polygon(calc(100% + var(--corner-radius) * -0.9476) calc(var(--corner-radius) * 0.0000), calc(100% + var(--corner-radius) * -0.8949) calc(var(--corner-radius) * 0.0004), calc(100% + var(--corner-radius) * -0.8418) calc(var(--corner-radius) * 0.0013), calc(100% + var(--corner-radius) * -0.7881) calc(var(--corner-radius) * 0.0032), calc(100% + var(--corner-radius) * -0.7337) calc(var(--corner-radius) * 0.0063), calc(100% + var(--corner-radius) * -0.6787) calc(var(--corner-radius) * 0.0112), calc(100% + var(--corner-radius) * -0.6231) calc(var(--corner-radius) * 0.0182), calc(100% + var(--corner-radius) * -0.5671) calc(var(--corner-radius) * 0.0278), calc(100% + var(--corner-radius) * -0.5111) calc(var(--corner-radius) * 0.0406), calc(100% + var(--corner-radius) * -0.4555) calc(var(--corner-radius) * 0.0570), calc(100% + var(--corner-radius) * -0.4009) calc(var(--corner-radius) * 0.0775), calc(100% + var(--corner-radius) * -0.3480) calc(var(--corner-radius) * 0.1026), calc(100% + var(--corner-radius) * -0.2974) calc(var(--corner-radius) * 0.1324), calc(100% + var(--corner-radius) * -0.2499) calc(var(--corner-radius) * 0.1670), calc(100% + var(--corner-radius) * -0.2063) calc(var(--corner-radius) * 0.2063), calc(100% + var(--corner-radius) * -0.1670) calc(var(--corner-radius) * 0.2499), calc(100% + var(--corner-radius) * -0.1324) calc(var(--corner-radius) * 0.2974), calc(100% + var(--corner-radius) * -0.1026) calc(var(--corner-radius) * 0.3480), calc(100% + var(--corner-radius) * -0.0775) calc(var(--corner-radius) * 0.4009), calc(100% + var(--corner-radius) * -0.0570) calc(var(--corner-radius) * 0.4555), calc(100% + var(--corner-radius) * -0.0406) calc(var(--corner-radius) * 0.5111), calc(100% + var(--corner-radius) * -0.0278) calc(var(--corner-radius) * 0.5671), calc(100% + var(--corner-radius) * -0.0182) calc(var(--corner-radius) * 0.6231), calc(100% + var(--corner-radius) * -0.0112) calc(var(--corner-radius) * 0.6787), calc(100% + var(--corner-radius) * -0.0063) calc(var(--corner-radius) * 0.7337), calc(100% + var(--corner-radius) * -0.0032) calc(var(--corner-radius) * 0.7881), calc(100% + var(--corner-radius) * -0.0013) calc(var(--corner-radius) * 0.8418), calc(100% + var(--corner-radius) * -0.0004) calc(var(--corner-radius) * 0.8949), calc(100% + var(--corner-radius) * -0.0000) calc(var(--corner-radius) * 0.9476), calc(100% + var(--corner-radius) * -0.0000) calc(100% + var(--corner-radius) * -0.9476), calc(100% + var(--corner-radius) * -0.0004) calc(100% + var(--corner-radius) * -0.8949), calc(100% + var(--corner-radius) * -0.0013) calc(100% + var(--corner-radius) * -0.8418), calc(100% + var(--corner-radius) * -0.0032) calc(100% + var(--corner-radius) * -0.7881), calc(100% + var(--corner-radius) * -0.0063) calc(100% + var(--corner-radius) * -0.7337), calc(100% + var(--corner-radius) * -0.0112) calc(100% + var(--corner-radius) * -0.6787), calc(100% + var(--corner-radius) * -0.0182) calc(100% + var(--corner-radius) * -0.6231), calc(100% + var(--corner-radius) * -0.0278) calc(100% + var(--corner-radius) * -0.5671), calc(100% + var(--corner-radius) * -0.0406) calc(100% + var(--corner-radius) * -0.5111), calc(100% + var(--corner-radius) * -0.0570) calc(100% + var(--corner-radius) * -0.4555), calc(100% + var(--corner-radius) * -0.0775) calc(100% + var(--corner-radius) * -0.4009), calc(100% + var(--corner-radius) * -0.1026) calc(100% + var(--corner-radius) * -0.3480), calc(100% + var(--corner-radius) * -0.1324) calc(100% + var(--corner-radius) * -0.2974), calc(100% + var(--corner-radius) * -0.1670) calc(100% + var(--corner-radius) * -0.2499), calc(100% + var(--corner-radius) * -0.2063) calc(100% + var(--corner-radius) * -0.2063), calc(100% + var(--corner-radius) * -0.2499) calc(100% + var(--corner-radius) * -0.1670), calc(100% + var(--corner-radius) * -0.2974) calc(100% + var(--corner-radius) * -0.1324), calc(100% + var(--corner-radius) * -0.3480) calc(100% + var(--corner-radius) * -0.1026), calc(100% + var(--corner-radius) * -0.4009) calc(100% + var(--corner-radius) * -0.0775), calc(100% + var(--corner-radius) * -0.4555) calc(100% + var(--corner-radius) * -0.0570), calc(100% + var(--corner-radius) * -0.5111) calc(100% + var(--corner-radius) * -0.0406), calc(100% + var(--corner-radius) * -0.5671) calc(100% + var(--corner-radius) * -0.0278), calc(100% + var(--corner-radius) * -0.6231) calc(100% + var(--corner-radius) * -0.0182), calc(100% + var(--corner-radius) * -0.6787) calc(100% + var(--corner-radius) * -0.0112), calc(100% + var(--corner-radius) * -0.7337) calc(100% + var(--corner-radius) * -0.0063), calc(100% + var(--corner-radius) * -0.7881) calc(100% + var(--corner-radius) * -0.0032), calc(100% + var(--corner-radius) * -0.8418) calc(100% + var(--corner-radius) * -0.0013), calc(100% + var(--corner-radius) * -0.8949) calc(100% + var(--corner-radius) * -0.0004), calc(100% + var(--corner-radius) * -0.9476) calc(100% + var(--corner-radius) * -0.0000), calc(var(--corner-radius) * 0.9476) calc(100% + var(--corner-radius) * -0.0000), calc(var(--corner-radius) * 0.8949) calc(100% + var(--corner-radius) * -0.0004), calc(var(--corner-radius) * 0.8418) calc(100% + var(--corner-radius) * -0.0013), calc(var(--corner-radius) * 0.7881) calc(100% + var(--corner-radius) * -0.0032), calc(var(--corner-radius) * 0.7337) calc(100% + var(--corner-radius) * -0.0063), calc(var(--corner-radius) * 0.6787) calc(100% + var(--corner-radius) * -0.0112), calc(var(--corner-radius) * 0.6231) calc(100% + var(--corner-radius) * -0.0182), calc(var(--corner-radius) * 0.5671) calc(100% + var(--corner-radius) * -0.0278), calc(var(--corner-radius) * 0.5111) calc(100% + var(--corner-radius) * -0.0406), calc(var(--corner-radius) * 0.4555) calc(100% + var(--corner-radius) * -0.0570), calc(var(--corner-radius) * 0.4009) calc(100% + var(--corner-radius) * -0.0775), calc(var(--corner-radius) * 0.3480) calc(100% + var(--corner-radius) * -0.1026), calc(var(--corner-radius) * 0.2974) calc(100% + var(--corner-radius) * -0.1324), calc(var(--corner-radius) * 0.2499) calc(100% + var(--corner-radius) * -0.1670), calc(var(--corner-radius) * 0.2063) calc(100% + var(--corner-radius) * -0.2063), calc(var(--corner-radius) * 0.1670) calc(100% + var(--corner-radius) * -0.2499), calc(var(--corner-radius) * 0.1324) calc(100% + var(--corner-radius) * -0.2974), calc(var(--corner-radius) * 0.1026) calc(100% + var(--corner-radius) * -0.3480), calc(var(--corner-radius) * 0.0775) calc(100% + var(--corner-radius) * -0.4009), calc(var(--corner-radius) * 0.0570) calc(100% + var(--corner-radius) * -0.4555), calc(var(--corner-radius) * 0.0406) calc(100% + var(--corner-radius) * -0.5111), calc(var(--corner-radius) * 0.0278) calc(100% + var(--corner-radius) * -0.5671), calc(var(--corner-radius) * 0.0182) calc(100% + var(--corner-radius) * -0.6231), calc(var(--corner-radius) * 0.0112) calc(100% + var(--corner-radius) * -0.6787), calc(var(--corner-radius) * 0.0063) calc(100% + var(--corner-radius) * -0.7337), calc(var(--corner-radius) * 0.0032) calc(100% + var(--corner-radius) * -0.7881), calc(var(--corner-radius) * 0.0013) calc(100% + var(--corner-radius) * -0.8418), calc(var(--corner-radius) * 0.0004) calc(100% + var(--corner-radius) * -0.8949), calc(var(--corner-radius) * 0.0000) calc(100% + var(--corner-radius) * -0.9476), calc(var(--corner-radius) * 0.0000) calc(var(--corner-radius) * 0.9476), calc(var(--corner-radius) * 0.0004) calc(var(--corner-radius) * 0.8949), calc(var(--corner-radius) * 0.0013) calc(var(--corner-radius) * 0.8418), calc(var(--corner-radius) * 0.0032) calc(var(--corner-radius) * 0.7881), calc(var(--corner-radius) * 0.0063) calc(var(--corner-radius) * 0.7337), calc(var(--corner-radius) * 0.0112) calc(var(--corner-radius) * 0.6787), calc(var(--corner-radius) * 0.0182) calc(var(--corner-radius) * 0.6231), calc(var(--corner-radius) * 0.0278) calc(var(--corner-radius) * 0.5671), calc(var(--corner-radius) * 0.0406) calc(var(--corner-radius) * 0.5111), calc(var(--corner-radius) * 0.0570) calc(var(--corner-radius) * 0.4555), calc(var(--corner-radius) * 0.0775) calc(var(--corner-radius) * 0.4009), calc(var(--corner-radius) * 0.1026) calc(var(--corner-radius) * 0.3480), calc(var(--corner-radius) * 0.1324) calc(var(--corner-radius) * 0.2974), calc(var(--corner-radius) * 0.1670) calc(var(--corner-radius) * 0.2499), calc(var(--corner-radius) * 0.2063) calc(var(--corner-radius) * 0.2063), calc(var(--corner-radius) * 0.2499) calc(var(--corner-radius) * 0.1670), calc(var(--corner-radius) * 0.2974) calc(var(--corner-radius) * 0.1324), calc(var(--corner-radius) * 0.3480) calc(var(--corner-radius) * 0.1026), calc(var(--corner-radius) * 0.4009) calc(var(--corner-radius) * 0.0775), calc(var(--corner-radius) * 0.4555) calc(var(--corner-radius) * 0.0570), calc(var(--corner-radius) * 0.5111) calc(var(--corner-radius) * 0.0406), calc(var(--corner-radius) * 0.5671) calc(var(--corner-radius) * 0.0278), calc(var(--corner-radius) * 0.6231) calc(var(--corner-radius) * 0.0182), calc(var(--corner-radius) * 0.6787) calc(var(--corner-radius) * 0.0112), calc(var(--corner-radius) * 0.7337) calc(var(--corner-radius) * 0.0063), calc(var(--corner-radius) * 0.7881) calc(var(--corner-radius) * 0.0032), calc(var(--corner-radius) * 0.8418) calc(var(--corner-radius) * 0.0013), calc(var(--corner-radius) * 0.8949) calc(var(--corner-radius) * 0.0004), calc(var(--corner-radius) * 0.9476) calc(var(--corner-radius) * 0.0000));
     overflow-y: scroll;
     border-radius: 3.5rem;
-    box-shadow: inset 0 0 20px 10px #46506238;
+    box-shadow: none;
     width: 100%;
     height: 100%;
+    border: #fef2f6aa solid .15rem;
 }
+
+    body.dark-mode .posts-wrapper .pw_content{
+        box-sizing: border-box;
+        background: linear-gradient(80deg, #1e2633, #1c293d, #1b2b42);
+        box-shadow: inset 0 0 20px 10px #46506238;
+        border: none;
+    }
 
 .posts-wrapper .pw_content::-webkit-scrollbar{
     display:none;
@@ -479,18 +502,27 @@ main{
     top: 0;
     width: 100%;
     height: 100%;
+    box-shadow: none;
+}
+
+body.dark-mode .new-post .background{
     box-shadow:  0 0 12px 10px #6c788618;
 }
 
 .new-post .content{
-    background-color: #323d4f;
+    background-color: #f6dce088;
+    box-shadow: inset 0 0 15px 10px #f5dee288;
     padding: 1.2rem;
     --corner-radius: 3.5rem;
     display: flex;
     gap: 1rem;
     border-radius: 2rem;
-    box-shadow: inset 0 0 20px 10px #54607530;
 }
+
+    body.dark-mode .new-post .content{
+        background-color: #323d4f;
+        box-shadow: inset 0 0 20px 10px #54607530;
+    }
 
 .post-content{
     box-sizing: border-box;
@@ -511,7 +543,7 @@ main{
     background-color: #00000000;
     border: none;
     outline: none;
-    color: #ffffff
+    color: var(--color);
 }
 
 form label{
@@ -535,7 +567,7 @@ form input[type="file"] {
 
 .image-button span {
     font-size: 28px;
-    color: #ffffff;
+    color: var(--theme-color1);
 }
 
 .image-button:hover span {
@@ -549,13 +581,34 @@ form input[type="file"] {
 
 .unit{
     padding: 1rem 0;
-    border-bottom: .1rem solid #9aa0ae44;
+    border-bottom: #ffe3ee88 solid .15rem;
     position: relative;
 }
+
+    body.dark-mode .unit{
+        border-bottom: .1rem solid #9aa0ae44;
+    }
 
 .post{
     display: flex;
     gap: 1rem;
+}
+
+.post,
+.post-footer{
+    transform: scale(1);
+}
+
+.unit:has(a.large:hover) .post,
+.unit:has(a.large:hover) .post-footer{
+    transform: scale(1.04);
+    transition: transform 0.5s linear(0, 0.395 7.9%, 0.702 16.3%, 0.921 25.2%, 1 29.9%, 1.06 34.8%, 1.095 39%, 1.118 43.4%, 1.13 48.1%, 1.131 53.1%, 1.11 62.2%, 1.019 86%, 1.004 93%, 1);
+}
+
+.unit:not(:has(a.large:hover)) .post,
+.unit:not(:has(a.large:hover)) .post-footer{
+    transform: scale(1);
+    transition: transform 0.3s ease-out;
 }
 
 .icon_background{
@@ -565,7 +618,7 @@ form input[type="file"] {
     height: 3.3rem;
     --corner-radius: 1.65rem;
     clip-path: polygon(calc(100% + var(--corner-radius) * -0.9476) calc(var(--corner-radius) * 0.0003), calc(100% + var(--corner-radius) * -0.8950) calc(var(--corner-radius) * 0.0014), calc(100% + var(--corner-radius) * -0.8422) calc(var(--corner-radius) * 0.0040), calc(100% + var(--corner-radius) * -0.7892) calc(var(--corner-radius) * 0.0082), calc(100% + var(--corner-radius) * -0.7359) calc(var(--corner-radius) * 0.0145), calc(100% + var(--corner-radius) * -0.6826) calc(var(--corner-radius) * 0.0231), calc(100% + var(--corner-radius) * -0.6293) calc(var(--corner-radius) * 0.0343), calc(100% + var(--corner-radius) * -0.5764) calc(var(--corner-radius) * 0.0485), calc(100% + var(--corner-radius) * -0.5240) calc(var(--corner-radius) * 0.0657), calc(100% + var(--corner-radius) * -0.4725) calc(var(--corner-radius) * 0.0863), calc(100% + var(--corner-radius) * -0.4223) calc(var(--corner-radius) * 0.1104), calc(100% + var(--corner-radius) * -0.3738) calc(var(--corner-radius) * 0.1381), calc(100% + var(--corner-radius) * -0.3273) calc(var(--corner-radius) * 0.1693), calc(100% + var(--corner-radius) * -0.2833) calc(var(--corner-radius) * 0.2041), calc(100% + var(--corner-radius) * -0.2421) calc(var(--corner-radius) * 0.2421), calc(100% + var(--corner-radius) * -0.2041) calc(var(--corner-radius) * 0.2833), calc(100% + var(--corner-radius) * -0.1693) calc(var(--corner-radius) * 0.3273), calc(100% + var(--corner-radius) * -0.1381) calc(var(--corner-radius) * 0.3738), calc(100% + var(--corner-radius) * -0.1104) calc(var(--corner-radius) * 0.4223), calc(100% + var(--corner-radius) * -0.0863) calc(var(--corner-radius) * 0.4725), calc(100% + var(--corner-radius) * -0.0657) calc(var(--corner-radius) * 0.5240), calc(100% + var(--corner-radius) * -0.0485) calc(var(--corner-radius) * 0.5764), calc(100% + var(--corner-radius) * -0.0343) calc(var(--corner-radius) * 0.6293), calc(100% + var(--corner-radius) * -0.0231) calc(var(--corner-radius) * 0.6826), calc(100% + var(--corner-radius) * -0.0145) calc(var(--corner-radius) * 0.7359), calc(100% + var(--corner-radius) * -0.0082) calc(var(--corner-radius) * 0.7892), calc(100% + var(--corner-radius) * -0.0040) calc(var(--corner-radius) * 0.8422), calc(100% + var(--corner-radius) * -0.0014) calc(var(--corner-radius) * 0.8950), calc(100% + var(--corner-radius) * -0.0003) calc(var(--corner-radius) * 0.9476), calc(100% + var(--corner-radius) * -0.0003) calc(100% + var(--corner-radius) * -0.9476), calc(100% + var(--corner-radius) * -0.0014) calc(100% + var(--corner-radius) * -0.8950), calc(100% + var(--corner-radius) * -0.0040) calc(100% + var(--corner-radius) * -0.8422), calc(100% + var(--corner-radius) * -0.0082) calc(100% + var(--corner-radius) * -0.7892), calc(100% + var(--corner-radius) * -0.0145) calc(100% + var(--corner-radius) * -0.7359), calc(100% + var(--corner-radius) * -0.0231) calc(100% + var(--corner-radius) * -0.6826), calc(100% + var(--corner-radius) * -0.0343) calc(100% + var(--corner-radius) * -0.6293), calc(100% + var(--corner-radius) * -0.0485) calc(100% + var(--corner-radius) * -0.5764), calc(100% + var(--corner-radius) * -0.0657) calc(100% + var(--corner-radius) * -0.5240), calc(100% + var(--corner-radius) * -0.0863) calc(100% + var(--corner-radius) * -0.4725), calc(100% + var(--corner-radius) * -0.1104) calc(100% + var(--corner-radius) * -0.4223), calc(100% + var(--corner-radius) * -0.1381) calc(100% + var(--corner-radius) * -0.3738), calc(100% + var(--corner-radius) * -0.1693) calc(100% + var(--corner-radius) * -0.3273), calc(100% + var(--corner-radius) * -0.2041) calc(100% + var(--corner-radius) * -0.2833), calc(100% + var(--corner-radius) * -0.2421) calc(100% + var(--corner-radius) * -0.2421), calc(100% + var(--corner-radius) * -0.2833) calc(100% + var(--corner-radius) * -0.2041), calc(100% + var(--corner-radius) * -0.3273) calc(100% + var(--corner-radius) * -0.1693), calc(100% + var(--corner-radius) * -0.3738) calc(100% + var(--corner-radius) * -0.1381), calc(100% + var(--corner-radius) * -0.4223) calc(100% + var(--corner-radius) * -0.1104), calc(100% + var(--corner-radius) * -0.4725) calc(100% + var(--corner-radius) * -0.0863), calc(100% + var(--corner-radius) * -0.5240) calc(100% + var(--corner-radius) * -0.0657), calc(100% + var(--corner-radius) * -0.5764) calc(100% + var(--corner-radius) * -0.0485), calc(100% + var(--corner-radius) * -0.6293) calc(100% + var(--corner-radius) * -0.0343), calc(100% + var(--corner-radius) * -0.6826) calc(100% + var(--corner-radius) * -0.0231), calc(100% + var(--corner-radius) * -0.7359) calc(100% + var(--corner-radius) * -0.0145), calc(100% + var(--corner-radius) * -0.7892) calc(100% + var(--corner-radius) * -0.0082), calc(100% + var(--corner-radius) * -0.8422) calc(100% + var(--corner-radius) * -0.0040), calc(100% + var(--corner-radius) * -0.8950) calc(100% + var(--corner-radius) * -0.0014), calc(100% + var(--corner-radius) * -0.9476) calc(100% + var(--corner-radius) * -0.0003), calc(var(--corner-radius) * 0.9476) calc(100% + var(--corner-radius) * -0.0003), calc(var(--corner-radius) * 0.8950) calc(100% + var(--corner-radius) * -0.0014), calc(var(--corner-radius) * 0.8422) calc(100% + var(--corner-radius) * -0.0040), calc(var(--corner-radius) * 0.7892) calc(100% + var(--corner-radius) * -0.0082), calc(var(--corner-radius) * 0.7359) calc(100% + var(--corner-radius) * -0.0145), calc(var(--corner-radius) * 0.6826) calc(100% + var(--corner-radius) * -0.0231), calc(var(--corner-radius) * 0.6293) calc(100% + var(--corner-radius) * -0.0343), calc(var(--corner-radius) * 0.5764) calc(100% + var(--corner-radius) * -0.0485), calc(var(--corner-radius) * 0.5240) calc(100% + var(--corner-radius) * -0.0657), calc(var(--corner-radius) * 0.4725) calc(100% + var(--corner-radius) * -0.0863), calc(var(--corner-radius) * 0.4223) calc(100% + var(--corner-radius) * -0.1104), calc(var(--corner-radius) * 0.3738) calc(100% + var(--corner-radius) * -0.1381), calc(var(--corner-radius) * 0.3273) calc(100% + var(--corner-radius) * -0.1693), calc(var(--corner-radius) * 0.2833) calc(100% + var(--corner-radius) * -0.2041), calc(var(--corner-radius) * 0.2421) calc(100% + var(--corner-radius) * -0.2421), calc(var(--corner-radius) * 0.2041) calc(100% + var(--corner-radius) * -0.2833), calc(var(--corner-radius) * 0.1693) calc(100% + var(--corner-radius) * -0.3273), calc(var(--corner-radius) * 0.1381) calc(100% + var(--corner-radius) * -0.3738), calc(var(--corner-radius) * 0.1104) calc(100% + var(--corner-radius) * -0.4223), calc(var(--corner-radius) * 0.0863) calc(100% + var(--corner-radius) * -0.4725), calc(var(--corner-radius) * 0.0657) calc(100% + var(--corner-radius) * -0.5240), calc(var(--corner-radius) * 0.0485) calc(100% + var(--corner-radius) * -0.5764), calc(var(--corner-radius) * 0.0343) calc(100% + var(--corner-radius) * -0.6293), calc(var(--corner-radius) * 0.0231) calc(100% + var(--corner-radius) * -0.6826), calc(var(--corner-radius) * 0.0145) calc(100% + var(--corner-radius) * -0.7359), calc(var(--corner-radius) * 0.0082) calc(100% + var(--corner-radius) * -0.7892), calc(var(--corner-radius) * 0.0040) calc(100% + var(--corner-radius) * -0.8422), calc(var(--corner-radius) * 0.0014) calc(100% + var(--corner-radius) * -0.8950), calc(var(--corner-radius) * 0.0003) calc(100% + var(--corner-radius) * -0.9476), calc(var(--corner-radius) * 0.0003) calc(var(--corner-radius) * 0.9476), calc(var(--corner-radius) * 0.0014) calc(var(--corner-radius) * 0.8950), calc(var(--corner-radius) * 0.0040) calc(var(--corner-radius) * 0.8422), calc(var(--corner-radius) * 0.0082) calc(var(--corner-radius) * 0.7892), calc(var(--corner-radius) * 0.0145) calc(var(--corner-radius) * 0.7359), calc(var(--corner-radius) * 0.0231) calc(var(--corner-radius) * 0.6826), calc(var(--corner-radius) * 0.0343) calc(var(--corner-radius) * 0.6293), calc(var(--corner-radius) * 0.0485) calc(var(--corner-radius) * 0.5764), calc(var(--corner-radius) * 0.0657) calc(var(--corner-radius) * 0.5240), calc(var(--corner-radius) * 0.0863) calc(var(--corner-radius) * 0.4725), calc(var(--corner-radius) * 0.1104) calc(var(--corner-radius) * 0.4223), calc(var(--corner-radius) * 0.1381) calc(var(--corner-radius) * 0.3738), calc(var(--corner-radius) * 0.1693) calc(var(--corner-radius) * 0.3273), calc(var(--corner-radius) * 0.2041) calc(var(--corner-radius) * 0.2833), calc(var(--corner-radius) * 0.2421) calc(var(--corner-radius) * 0.2421), calc(var(--corner-radius) * 0.2833) calc(var(--corner-radius) * 0.2041), calc(var(--corner-radius) * 0.3273) calc(var(--corner-radius) * 0.1693), calc(var(--corner-radius) * 0.3738) calc(var(--corner-radius) * 0.1381), calc(var(--corner-radius) * 0.4223) calc(var(--corner-radius) * 0.1104), calc(var(--corner-radius) * 0.4725) calc(var(--corner-radius) * 0.0863), calc(var(--corner-radius) * 0.5240) calc(var(--corner-radius) * 0.0657), calc(var(--corner-radius) * 0.5764) calc(var(--corner-radius) * 0.0485), calc(var(--corner-radius) * 0.6293) calc(var(--corner-radius) * 0.0343), calc(var(--corner-radius) * 0.6826) calc(var(--corner-radius) * 0.0231), calc(var(--corner-radius) * 0.7359) calc(var(--corner-radius) * 0.0145), calc(var(--corner-radius) * 0.7892) calc(var(--corner-radius) * 0.0082), calc(var(--corner-radius) * 0.8422) calc(var(--corner-radius) * 0.0040), calc(var(--corner-radius) * 0.8950) calc(var(--corner-radius) * 0.0014), calc(var(--corner-radius) * 0.9476) calc(var(--corner-radius) * 0.0003));
-    background-color: #1c7affaa;
+    background-color: var(--accent-color1);
 }
 
 img.icon{
@@ -591,6 +644,10 @@ img.icon{
     left: .15rem;
     width: 2.5rem;
     --corner-radius: 1.25rem;
+}
+
+.name span{
+    color: var(--label-color);
 }
 
 .post-content .name {
@@ -644,8 +701,8 @@ img.icon{
 
 .post-footer .buttons span{
     display: inline;
+    color: var(--accent-color2);
 }
-
 
 .post-footer span{
     display: block;
@@ -699,7 +756,7 @@ button.unlike:hover span{
 }
 
 button.liked span{
-    color: #ff1b5c;
+    color: #ff1b5c !important;
     font-size: 1.2rem;
     margin-left: .5rem;
 }
@@ -795,10 +852,15 @@ p.comment-text{
     overflow-y: hidden;
     display: flex;
     gap: 1rem;
-    background-color: #323d4f;
+    background-color: #f8d0d6;
+    box-shadow: inset 0 0 15px 10px #f5dee288;
     border-radius: 2rem;
-    box-shadow: inset 0 0 20px 10px #54607530;
 }
+
+    body.dark-mode .quoted-post{
+        background-color: #323d4f;
+        box-shadow: inset 0 0 20px 10px #54607530;
+    }
 
 .quoted-unit .background{
     position: absolute;
@@ -807,7 +869,30 @@ p.comment-text{
     top: 0;
     width: 100%;
     height: 100%;
-    box-shadow:  0 0 12px 10px #6c788618;
+    box-shadow:  0 0 10px 10px #e7c0c488;
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1);
+}
+
+    body.dark-mode .quoted-unit .background{
+        box-shadow:  0 0 12px 10px #3e435844;
+    }
+
+.quoted-unit .background,
+.quoted-post.content {
+    transform: scale(1);
+}
+
+.unit.quoted-unit:has(a:hover) .background,
+.unit.quoted-unit:has(a:hover) .quoted-post.content {
+    transform: scale(1.04); 
+    transition: transform 0.5s linear(0, 0.242 4.1%, 0.453 8.2%, 0.637 12.4%, 0.722 14.6%, 0.799 16.8%, 0.869 19%, 0.934 21.3%, 0.993 23.6%, 1.044 25.9%, 1.088 28.2%, 1.128 30.6%, 1.163 33.1%, 1.191 35.6%, 1.21 37.7%, 1.225 39.8%, 1.236 41.9%, 1.244 44.1%, 1.249 46.4%, 1.25 48.7%, 1.248 51.1%, 1.241 53.7%, 1.225 58%, 1.198 62.8%, 1.167 67.5%, 1.079 79.7%, 1.055 83.3%, 1.037 86.5%, 1.02 90.1%, 1.009 93.5%, 1.002 96.8%, 1)
+}
+
+.unit.quoted-unit:not(:has(a:hover)) .background,
+.unit.quoted-unit:not(:has(a:hover)) .quoted-post.content {
+    transform: scale(1);
+    transition: transform 0.3s ease-out; 
 }
 
 .quoted-unit{
@@ -815,6 +900,10 @@ p.comment-text{
     padding: 0;
     margin-top: 1rem;
 }
+
+    body.dark-mode .quoted-unit{
+        border: none;
+    }
 
 button.delete-btn{
     background:none; 
@@ -846,7 +935,7 @@ button.delete-btn:hover span.material-symbols-rounded {
 }
 
 .quoted-post .post-body{
-    color: #c4c7cb;
+    color: var(--label-color);
 }
 
 .quoted-post .none{
@@ -895,7 +984,7 @@ a.post-link{
     clip-path: polygon(calc(100% + var(--corner-radius) * -0.9476) calc(var(--corner-radius) * 0.0003), calc(100% + var(--corner-radius) * -0.8950) calc(var(--corner-radius) * 0.0014), calc(100% + var(--corner-radius) * -0.8422) calc(var(--corner-radius) * 0.0040), calc(100% + var(--corner-radius) * -0.7892) calc(var(--corner-radius) * 0.0082), calc(100% + var(--corner-radius) * -0.7359) calc(var(--corner-radius) * 0.0145), calc(100% + var(--corner-radius) * -0.6826) calc(var(--corner-radius) * 0.0231), calc(100% + var(--corner-radius) * -0.6293) calc(var(--corner-radius) * 0.0343), calc(100% + var(--corner-radius) * -0.5764) calc(var(--corner-radius) * 0.0485), calc(100% + var(--corner-radius) * -0.5240) calc(var(--corner-radius) * 0.0657), calc(100% + var(--corner-radius) * -0.4725) calc(var(--corner-radius) * 0.0863), calc(100% + var(--corner-radius) * -0.4223) calc(var(--corner-radius) * 0.1104), calc(100% + var(--corner-radius) * -0.3738) calc(var(--corner-radius) * 0.1381), calc(100% + var(--corner-radius) * -0.3273) calc(var(--corner-radius) * 0.1693), calc(100% + var(--corner-radius) * -0.2833) calc(var(--corner-radius) * 0.2041), calc(100% + var(--corner-radius) * -0.2421) calc(var(--corner-radius) * 0.2421), calc(100% + var(--corner-radius) * -0.2041) calc(var(--corner-radius) * 0.2833), calc(100% + var(--corner-radius) * -0.1693) calc(var(--corner-radius) * 0.3273), calc(100% + var(--corner-radius) * -0.1381) calc(var(--corner-radius) * 0.3738), calc(100% + var(--corner-radius) * -0.1104) calc(var(--corner-radius) * 0.4223), calc(100% + var(--corner-radius) * -0.0863) calc(var(--corner-radius) * 0.4725), calc(100% + var(--corner-radius) * -0.0657) calc(var(--corner-radius) * 0.5240), calc(100% + var(--corner-radius) * -0.0485) calc(var(--corner-radius) * 0.5764), calc(100% + var(--corner-radius) * -0.0343) calc(var(--corner-radius) * 0.6293), calc(100% + var(--corner-radius) * -0.0231) calc(var(--corner-radius) * 0.6826), calc(100% + var(--corner-radius) * -0.0145) calc(var(--corner-radius) * 0.7359), calc(100% + var(--corner-radius) * -0.0082) calc(var(--corner-radius) * 0.7892), calc(100% + var(--corner-radius) * -0.0040) calc(var(--corner-radius) * 0.8422), calc(100% + var(--corner-radius) * -0.0014) calc(var(--corner-radius) * 0.8950), calc(100% + var(--corner-radius) * -0.0003) calc(var(--corner-radius) * 0.9476), calc(100% + var(--corner-radius) * -0.0003) calc(100% + var(--corner-radius) * -0.9476), calc(100% + var(--corner-radius) * -0.0014) calc(100% + var(--corner-radius) * -0.8950), calc(100% + var(--corner-radius) * -0.0040) calc(100% + var(--corner-radius) * -0.8422), calc(100% + var(--corner-radius) * -0.0082) calc(100% + var(--corner-radius) * -0.7892), calc(100% + var(--corner-radius) * -0.0145) calc(100% + var(--corner-radius) * -0.7359), calc(100% + var(--corner-radius) * -0.0231) calc(100% + var(--corner-radius) * -0.6826), calc(100% + var(--corner-radius) * -0.0343) calc(100% + var(--corner-radius) * -0.6293), calc(100% + var(--corner-radius) * -0.0485) calc(100% + var(--corner-radius) * -0.5764), calc(100% + var(--corner-radius) * -0.0657) calc(100% + var(--corner-radius) * -0.5240), calc(100% + var(--corner-radius) * -0.0863) calc(100% + var(--corner-radius) * -0.4725), calc(100% + var(--corner-radius) * -0.1104) calc(100% + var(--corner-radius) * -0.4223), calc(100% + var(--corner-radius) * -0.1381) calc(100% + var(--corner-radius) * -0.3738), calc(100% + var(--corner-radius) * -0.1693) calc(100% + var(--corner-radius) * -0.3273), calc(100% + var(--corner-radius) * -0.2041) calc(100% + var(--corner-radius) * -0.2833), calc(100% + var(--corner-radius) * -0.2421) calc(100% + var(--corner-radius) * -0.2421), calc(100% + var(--corner-radius) * -0.2833) calc(100% + var(--corner-radius) * -0.2041), calc(100% + var(--corner-radius) * -0.3273) calc(100% + var(--corner-radius) * -0.1693), calc(100% + var(--corner-radius) * -0.3738) calc(100% + var(--corner-radius) * -0.1381), calc(100% + var(--corner-radius) * -0.4223) calc(100% + var(--corner-radius) * -0.1104), calc(100% + var(--corner-radius) * -0.4725) calc(100% + var(--corner-radius) * -0.0863), calc(100% + var(--corner-radius) * -0.5240) calc(100% + var(--corner-radius) * -0.0657), calc(100% + var(--corner-radius) * -0.5764) calc(100% + var(--corner-radius) * -0.0485), calc(100% + var(--corner-radius) * -0.6293) calc(100% + var(--corner-radius) * -0.0343), calc(100% + var(--corner-radius) * -0.6826) calc(100% + var(--corner-radius) * -0.0231), calc(100% + var(--corner-radius) * -0.7359) calc(100% + var(--corner-radius) * -0.0145), calc(100% + var(--corner-radius) * -0.7892) calc(100% + var(--corner-radius) * -0.0082), calc(100% + var(--corner-radius) * -0.8422) calc(100% + var(--corner-radius) * -0.0040), calc(100% + var(--corner-radius) * -0.8950) calc(100% + var(--corner-radius) * -0.0014), calc(100% + var(--corner-radius) * -0.9476) calc(100% + var(--corner-radius) * -0.0003), calc(var(--corner-radius) * 0.9476) calc(100% + var(--corner-radius) * -0.0003), calc(var(--corner-radius) * 0.8950) calc(100% + var(--corner-radius) * -0.0014), calc(var(--corner-radius) * 0.8422) calc(100% + var(--corner-radius) * -0.0040), calc(var(--corner-radius) * 0.7892) calc(100% + var(--corner-radius) * -0.0082), calc(var(--corner-radius) * 0.7359) calc(100% + var(--corner-radius) * -0.0145), calc(var(--corner-radius) * 0.6826) calc(100% + var(--corner-radius) * -0.0231), calc(var(--corner-radius) * 0.6293) calc(100% + var(--corner-radius) * -0.0343), calc(var(--corner-radius) * 0.5764) calc(100% + var(--corner-radius) * -0.0485), calc(var(--corner-radius) * 0.5240) calc(100% + var(--corner-radius) * -0.0657), calc(var(--corner-radius) * 0.4725) calc(100% + var(--corner-radius) * -0.0863), calc(var(--corner-radius) * 0.4223) calc(100% + var(--corner-radius) * -0.1104), calc(var(--corner-radius) * 0.3738) calc(100% + var(--corner-radius) * -0.1381), calc(var(--corner-radius) * 0.3273) calc(100% + var(--corner-radius) * -0.1693), calc(var(--corner-radius) * 0.2833) calc(100% + var(--corner-radius) * -0.2041), calc(var(--corner-radius) * 0.2421) calc(100% + var(--corner-radius) * -0.2421), calc(var(--corner-radius) * 0.2041) calc(100% + var(--corner-radius) * -0.2833), calc(var(--corner-radius) * 0.1693) calc(100% + var(--corner-radius) * -0.3273), calc(var(--corner-radius) * 0.1381) calc(100% + var(--corner-radius) * -0.3738), calc(var(--corner-radius) * 0.1104) calc(100% + var(--corner-radius) * -0.4223), calc(var(--corner-radius) * 0.0863) calc(100% + var(--corner-radius) * -0.4725), calc(var(--corner-radius) * 0.0657) calc(100% + var(--corner-radius) * -0.5240), calc(var(--corner-radius) * 0.0485) calc(100% + var(--corner-radius) * -0.5764), calc(var(--corner-radius) * 0.0343) calc(100% + var(--corner-radius) * -0.6293), calc(var(--corner-radius) * 0.0231) calc(100% + var(--corner-radius) * -0.6826), calc(var(--corner-radius) * 0.0145) calc(100% + var(--corner-radius) * -0.7359), calc(var(--corner-radius) * 0.0082) calc(100% + var(--corner-radius) * -0.7892), calc(var(--corner-radius) * 0.0040) calc(100% + var(--corner-radius) * -0.8422), calc(var(--corner-radius) * 0.0014) calc(100% + var(--corner-radius) * -0.8950), calc(var(--corner-radius) * 0.0003) calc(100% + var(--corner-radius) * -0.9476), calc(var(--corner-radius) * 0.0003) calc(var(--corner-radius) * 0.9476), calc(var(--corner-radius) * 0.0014) calc(var(--corner-radius) * 0.8950), calc(var(--corner-radius) * 0.0040) calc(var(--corner-radius) * 0.8422), calc(var(--corner-radius) * 0.0082) calc(var(--corner-radius) * 0.7892), calc(var(--corner-radius) * 0.0145) calc(var(--corner-radius) * 0.7359), calc(var(--corner-radius) * 0.0231) calc(var(--corner-radius) * 0.6826), calc(var(--corner-radius) * 0.0343) calc(var(--corner-radius) * 0.6293), calc(var(--corner-radius) * 0.0485) calc(var(--corner-radius) * 0.5764), calc(var(--corner-radius) * 0.0657) calc(var(--corner-radius) * 0.5240), calc(var(--corner-radius) * 0.0863) calc(var(--corner-radius) * 0.4725), calc(var(--corner-radius) * 0.1104) calc(var(--corner-radius) * 0.4223), calc(var(--corner-radius) * 0.1381) calc(var(--corner-radius) * 0.3738), calc(var(--corner-radius) * 0.1693) calc(var(--corner-radius) * 0.3273), calc(var(--corner-radius) * 0.2041) calc(var(--corner-radius) * 0.2833), calc(var(--corner-radius) * 0.2421) calc(var(--corner-radius) * 0.2421), calc(var(--corner-radius) * 0.2833) calc(var(--corner-radius) * 0.2041), calc(var(--corner-radius) * 0.3273) calc(var(--corner-radius) * 0.1693), calc(var(--corner-radius) * 0.3738) calc(var(--corner-radius) * 0.1381), calc(var(--corner-radius) * 0.4223) calc(var(--corner-radius) * 0.1104), calc(var(--corner-radius) * 0.4725) calc(var(--corner-radius) * 0.0863), calc(var(--corner-radius) * 0.5240) calc(var(--corner-radius) * 0.0657), calc(var(--corner-radius) * 0.5764) calc(var(--corner-radius) * 0.0485), calc(var(--corner-radius) * 0.6293) calc(var(--corner-radius) * 0.0343), calc(var(--corner-radius) * 0.6826) calc(var(--corner-radius) * 0.0231), calc(var(--corner-radius) * 0.7359) calc(var(--corner-radius) * 0.0145), calc(var(--corner-radius) * 0.7892) calc(var(--corner-radius) * 0.0082), calc(var(--corner-radius) * 0.8422) calc(var(--corner-radius) * 0.0040), calc(var(--corner-radius) * 0.8950) calc(var(--corner-radius) * 0.0014), calc(var(--corner-radius) * 0.9476) calc(var(--corner-radius) * 0.0003));
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 500px) {
     button.basic{
         padding: .4rem .7rem;
         font-size: .75rem;
@@ -932,14 +1021,18 @@ a.post-link{
         height: 100%;
         border-radius: 0;
         --corner-radius: 0;
-        background:linear-gradient(80deg, #1c2532, #162337, #12253f);
+        background: linear-gradient(60deg, #f0adb9, #ecbdc8);
     }
 
-    .new-post .content{
+        body.dark-mode .posts-wrapper .pw_content{
+            background:linear-gradient(80deg, #1c2532, #162337, #12253f);
+        }
+
+    body.dark-mode .new-post .content{
         background-color: #28364d;
     }
 
-    .quoted-post{
+    body.dark-mode .quoted-post{
         background-color: #28364d;
     }
 
@@ -999,6 +1092,10 @@ a.post-link{
         font-size: .9rem;
         line-height: 1.1rem;
         font-family: var(--text-font-B);
+    }
+
+    .quoted-post{
+        --corner-radius: 3rem;
     }
 
     .post-footer .buttons{

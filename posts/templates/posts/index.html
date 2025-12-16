@@ -45,7 +45,7 @@
                             </div>
 
                             <div class="image-button-wrapper" style="display: flex; align-items: center; gap: 10px;">
-                                <span class="material-symbols-rounded" id="image-upload-icon" style="cursor: pointer; color: #ffffff88;">
+                                <span class="material-symbols-rounded" id="image-upload-icon" style="cursor: pointer;">
                                     add_photo_alternate
                                 </span>
 
@@ -68,7 +68,7 @@
                         <img src="{{ post.author.icon.url }}" class="icon">
                     </div>
                     <div class="post-content">
-                        <div class="name"><label>{{ post.author.display_name }}</label> @{{ post.author.username }}<span class="time-since-js" data-timestamp="{{ post.created_at|date:'Y-m-d\TH:i:s.u' }}" style="margin-left: auto; font-size: 1rem; color: #d8d8d8;">{{ post.created_at|timesince }}前</span>
+                        <div class="name"><label>{{ post.author.display_name }}</label> @{{ post.author.username }}<span class="time-since-js" data-timestamp="{{ post.created_at|date:'Y-m-d\TH:i:s.u' }}" style="margin-left: auto;">{{ post.created_at|timesince }}前</span>
                             {% if current_user == post.author %}
                             <button class="delete-btn" data-post-id="{{ post.post_id }}" onclick="event.stopPropagation();">
                                 <span class="material-symbols-rounded">delete</span>
@@ -101,7 +101,7 @@
                             <div class="name">
                                 <label>{{ post.quoted_post.author.display_name }}</label>
                                 @{{ post.quoted_post.author.username }}
-                                <span class="time-since-js" data-timestamp="{{ post.created_at|date:'Y-m-d\TH:i:s.u' }}" style="margin-left: auto; font-size: 0.9rem; color: #bdbdbd;">
+                                <span class="time-since-js" data-timestamp="{{ post.created_at|date:'Y-m-d\TH:i:s.u' }}" style="margin-left: auto;">
                                     {{ post.quoted_post.created_at|timesince }}前
                                 </span>
                             </div>
@@ -119,6 +119,7 @@
                 </div>
                 {% elif post.repost and not post.quoted_post %}
                 <div class="unit quoted-unit">
+                    <div class="background"></div>
                     <div class="post quoted-post unit-none polygon-clip-n30">
                         <div class="none"><p>このポストは削除されています。</p></div>
                     </div>
@@ -147,7 +148,7 @@
                     </div>
                     <span class="ID_index">ポストID:{{ post.post_id }}</span>
                 </div>
-                <a href="{% url 'posts:detail' post.post_id %}" class="post-link"></a>
+                <a href="{% url 'posts:detail' post.post_id %}" class="post-link large"></a>
             </div>
         {% endif %}
         {% endfor %}
@@ -510,8 +511,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewImage = document.getElementById('preview-image');
     const clearImageBtn = document.getElementById('clear-image-btn');
     
-    const INITIAL_ICON_COLOR = '#ffffff88'; 
-    const SUCCESS_ICON_COLOR = '#4CAF50'; 
+    const INITIAL_ICON_COLOR = ''; 
+    const SUCCESS_ICON_COLOR = '#e32844'; 
 
     if (imageInput && imageIcon && previewWrapper && previewImage && clearImageBtn) {
         

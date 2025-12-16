@@ -6,6 +6,7 @@
         <title>{% block title %}ログイン | Sparrow{% endblock %}</title>
         <link rel="preload" href="{% static 'posts/base.css' %}" as="style">
         <link rel="stylesheet" href="{% static 'posts/base.css' %}" />
+        <script src="{% static 'posts/js/toggledark.js' %}"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         {% comment %} Material Symbols Rounded {% endcomment %}
         <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -43,6 +44,7 @@
                     {% endif %}
                     </div>
                 </div>
+                <button class="basic polygon-clip-n35" id="theme-toggle">モードを切り替える</button>
                 {% if current_user.is_authenticated %}
                 <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
                     {% csrf_token %}
@@ -51,5 +53,16 @@
                 {% endif %}
             </div>
         {% block content %}{% endblock %}
+    
+        <script>
+            // DOMContentLoadedイベントで、要素がロードされてから関数を紐づける
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleButton = document.getElementById('theme-toggle');
+                if (toggleButton) {
+                    // toggledark.jsで定義した関数をボタンクリックイベントに紐づける
+                    toggleButton.addEventListener('click', toggleDarkMode);
+                }
+            });
+        </script>
         </main>
     </body>
